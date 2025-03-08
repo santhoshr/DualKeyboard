@@ -49,6 +49,8 @@ int lock_fd = -1;
 #define KEYCODE_PERIOD 47
 #define KEYCODE_SPACE 49
 #define KEYCODE_ZERO 29        // 0 key
+#define KEYCODE_ONE 18         // 1 key
+#define KEYCODE_N 45           // N key
 
 //Global Variables to keep track of modifier keys pressed
 bool ctr = false;
@@ -60,6 +62,7 @@ bool opt = false;
 bool caps_key_down = false;
 uint64_t caps_press_time = 0;
 bool vim_mode_active = false;
+bool vim_mode_locked = false;  // Track if vim navigation mode is locked
 bool key_repeat = false;  // Flag to track key repeat
 const uint64_t HOLD_THRESHOLD = 200000000; // 200ms in nanoseconds
 
@@ -302,6 +305,14 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 	// Track keys for exit combination (Escape + Control + Space)
 	if (keycode == KEYCODE_ESCAPE) {
 		escape_pressed = (type == kCGEventKeyDown);
+		
+		// Unlock vim mode when Escape is pressed
+		if (type == kCGEventKeyDown && vim_mode_locked) {
+			vim_mode_locked = false;
+			if (debug_mode) {
+				printf("Vim navigation mode unlocked with Escape\n");
+			}
+		}
 	} else if (keycode == (CGKeyCode)59 || keycode == (CGKeyCode)62) {
 		// Control key
 		control_pressed = (type == kCGEventKeyDown || type == kCGEventFlagsChanged);
@@ -328,6 +339,33 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 		cleanup_and_exit();
 	}
 	
+	// Check for vim mode lock combination (Escape + 1)
+	if (escape_pressed && keycode == KEYCODE_ONE && type == kCGEventKeyDown) {
+		vim_mode_locked = true;
+		vim_mode_active = true;
+		if (debug_mode) {
+			printf("Vim navigation mode locked with Escape + 1\n");
+		}
+		return NULL; // Suppress the 1 key
+	}
+	
+	// Check for Shift+I to exit vim mode when locked
+	if (keycode == KEYCODE_I && type == kCGEventKeyDown && vim_mode_locked) {
+		// Check if shift is pressed
+		CGEventFlags flags = CGEventGetFlags(event);
+		bool shift_pressed = (flags & kCGEventFlagMaskShift) != 0;
+		
+		if (shift_pressed) {
+			vim_mode_locked = false;
+			vim_mode_active = false;
+			if (debug_mode) {
+				printf("Vim navigation mode unlocked with Shift+I\n");
+			}
+			return NULL; // Suppress the Shift+I key to avoid unwanted input
+		}
+		// If it's just I without Shift, let it continue to the vim navigation handling below
+	}
+	
 	// Handle remapped CapsLock key (now Section key, keycode 10)
 	if (keycode == KEYCODE_SECTION) {
 		if (type == kCGEventKeyDown) {
@@ -340,7 +378,19 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 				// Initial key press
 				caps_key_down = true;
 				caps_press_time = current_time;
-				vim_mode_active = false;
+				
+				// If vim mode is locked, unlock it when CapsLock is pressed
+				if (vim_mode_locked) {
+					vim_mode_locked = false;
+					vim_mode_active = false;
+					if (debug_mode) {
+						printf("Vim navigation mode unlocked with CapsLock\n");
+					}
+				} else {
+					// Only deactivate vim mode if it's not locked
+					vim_mode_active = false;
+				}
+				
 				key_repeat = false;
 				
 				if (debug_mode) {
@@ -370,12 +420,14 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 			key_repeat = false;
 			
 			// Only send Escape if key was tapped briefly and Vim mode wasn't activated
-			if (!vim_mode_active && hold_duration < HOLD_THRESHOLD) {
+			if (!vim_mode_active && !vim_mode_locked && hold_duration < HOLD_THRESHOLD) {
 				send_escape_key();
 			}
 			
-			// End Vim navigation mode
-			vim_mode_active = false;
+			// End Vim navigation mode only if it's not locked
+			if (!vim_mode_locked) {
+				vim_mode_active = false;
+			}
 			
 			// Suppress the original event
 			return NULL;
@@ -386,19 +438,35 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 		return NULL;
 	}
 	
-	// Handle Vim navigation when CapsLock is held down
-	if (caps_key_down && type == kCGEventKeyDown) {
+	// Check for Capslock + n to lock vim mode
+	if (caps_key_down && keycode == KEYCODE_N && type == kCGEventKeyDown) {
+		vim_mode_locked = true;
+		vim_mode_active = true;
+		if (debug_mode) {
+			printf("Vim navigation mode locked with Capslock + n\n");
+		}
+		return NULL; // Suppress the n key
+	}
+	
+	// Handle Vim navigation when in vim mode (either active or locked)
+	if ((caps_key_down || vim_mode_locked) && type == kCGEventKeyDown) {
 		// Create a new event source for better event handling
 		CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 		if (!source) {
 			return event;
 		}
 		
-		uint64_t current_time = get_current_time_ns();
-		uint64_t hold_duration = current_time - caps_press_time;
+		// If vim mode is locked, we don't need to check hold duration
+		// Otherwise, check if CapsLock has been held long enough
+		bool should_process_vim_keys = vim_mode_locked;
 		
-		// Only enable Vim navigation if CapsLock has been held long enough
-		if (hold_duration >= HOLD_THRESHOLD) {
+		if (!should_process_vim_keys && caps_key_down) {
+			uint64_t current_time = get_current_time_ns();
+			uint64_t hold_duration = current_time - caps_press_time;
+			should_process_vim_keys = (hold_duration >= HOLD_THRESHOLD);
+		}
+		
+		if (should_process_vim_keys) {
 			// Mark that we're in Vim mode (which prevents Escape on release)
 			if (!vim_mode_active) {
 				vim_mode_active = true;
@@ -416,7 +484,22 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 				case KEYCODE_J: new_keycode = KEYCODE_DOWN_ARROW; break;
 				case KEYCODE_K: new_keycode = KEYCODE_UP_ARROW; break;
 				case KEYCODE_L: new_keycode = KEYCODE_RIGHT_ARROW; break;
-				case KEYCODE_I: new_keycode = KEYCODE_PAGE_UP; break;
+				case KEYCODE_I: 
+					// If i is pressed and vim mode is locked, we need to check if shift is pressed
+					if (vim_mode_locked) {
+						CGEventFlags flags = CGEventGetFlags(event);
+						bool shift_pressed = (flags & kCGEventFlagMaskShift) != 0;
+						
+						// Only remap to Page Up if Shift is not pressed
+						if (!shift_pressed) {
+							new_keycode = KEYCODE_PAGE_UP;
+						} else {
+							should_remap = false;
+						}
+						break;
+					}
+					new_keycode = KEYCODE_PAGE_UP; 
+					break;
 				case KEYCODE_O: new_keycode = KEYCODE_PAGE_DOWN; break;
 				case KEYCODE_COMMA: new_keycode = KEYCODE_HOME; break;
 				case KEYCODE_PERIOD: new_keycode = KEYCODE_END; break;
@@ -439,7 +522,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 		}
 	}
 	// Handle key up events for vim navigation keys
-	else if (caps_key_down && type == kCGEventKeyUp && vim_mode_active) {
+	else if ((caps_key_down || vim_mode_locked) && type == kCGEventKeyUp && vim_mode_active) {
 		// Create a new event source for better event handling
 		CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
 		if (!source) {
@@ -455,7 +538,22 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 			case KEYCODE_J: new_keycode = KEYCODE_DOWN_ARROW; break;
 			case KEYCODE_K: new_keycode = KEYCODE_UP_ARROW; break;
 			case KEYCODE_L: new_keycode = KEYCODE_RIGHT_ARROW; break;
-			case KEYCODE_I: new_keycode = KEYCODE_PAGE_UP; break;
+			case KEYCODE_I: 
+				// If i is pressed and vim mode is locked, we need to check if shift is pressed
+				if (vim_mode_locked) {
+					CGEventFlags flags = CGEventGetFlags(event);
+					bool shift_pressed = (flags & kCGEventFlagMaskShift) != 0;
+					
+					// Only remap to Page Up if Shift is not pressed
+					if (!shift_pressed) {
+						new_keycode = KEYCODE_PAGE_UP;
+					} else {
+						should_remap = false;
+					}
+					break;
+				}
+				new_keycode = KEYCODE_PAGE_UP; 
+				break;
 			case KEYCODE_O: new_keycode = KEYCODE_PAGE_DOWN; break;
 			case KEYCODE_COMMA: new_keycode = KEYCODE_HOME; break;
 			case KEYCODE_PERIOD: new_keycode = KEYCODE_END; break;
@@ -571,7 +669,14 @@ main(int argc, char* argv[])
 	CGEventTapEnable(eventTap, true);
 	
 	if (debug_mode) {
-		printf("dual is running. Press Escape + Control + Space to exit.\n");
+		printf("dual is running.\n");
+		printf("Control shortcuts:\n");
+		printf("- Press Escape + Control + Space to exit\n");
+		printf("- Press Escape + 0 to restart the program\n");
+		printf("\nVim navigation mode features:\n");
+		printf("- Hold CapsLock and press h/j/k/l for arrow keys\n");
+		printf("- Press Escape+1 or CapsLock+n to lock vim navigation mode\n");
+		printf("- Press Escape, CapsLock, or Shift+I to exit vim navigation mode\n");
 	}
 
 	// Set it all running.
