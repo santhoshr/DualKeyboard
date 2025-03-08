@@ -1,3 +1,3 @@
-dualkeyboards: alterkeys.c
-	gcc -Wall -o alterkeys alterkeys.c -framework ApplicationServices
+dualkeyboards: dual.c
+	gcc -Wall -o dual dual.c -framework ApplicationServices
 	osascript assistive-enabled.scpt

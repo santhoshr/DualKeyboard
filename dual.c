@@ -1,9 +1,9 @@
-// alterkeys.c
+// dual.c
 // http://osxbook.com
 // modified by Chance Miller to support multikeyboard use
 //
 // Complile using the following command line:
-//	 gcc -Wall -o alterkeys alterkeys.c -framework ApplicationServices
+//	 gcc -Wall -o dual dual.c -framework ApplicationServices
 //
 // You need superuser privileges to create the event tap, unless accessibility
 // is enabled. To do so, select the "Enable access for assistive devices"
@@ -31,48 +31,28 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 	CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
 	//Control
 	if(keycode == (CGKeyCode)59||keycode == (CGKeyCode)62){
-		if(ctr){
-			ctr = false;
-		}
-		else{
-			ctr = true;
-		}
+		ctr = !ctr;
 	}
 	if(ctr){
 		CGEventSetFlags(event,NX_CONTROLMASK|CGEventGetFlags(event));
 	}
 	//Shift
 	if(keycode == (CGKeyCode)60||keycode == (CGKeyCode)56){
-		if(sft){
-			sft = false;
-		}
-		else{
-			sft = true;
-		}
+		sft = !sft;
 	}
 	if(sft){
 		CGEventSetFlags(event,NX_SHIFTMASK|CGEventGetFlags(event));
 	}
 	//Command
 	if(keycode == (CGKeyCode)55||keycode == (CGKeyCode)54){
-		if(cmd){
-			cmd = false;
-		}
-		else{
-			cmd = true;
-		}
+		cmd = !cmd;
 	}
 	if(cmd){
 		CGEventSetFlags(event,NX_COMMANDMASK|CGEventGetFlags(event));
 	}
 	//Option
 	if(keycode == (CGKeyCode)58||keycode == (CGKeyCode)61){
-		if(opt){
-			opt = false;
-		}
-		else{
-			opt = true;
-		}
+		opt = !opt;
 	}
 	if(opt){
 		CGEventSetFlags(event,NX_ALTERNATEMASK|CGEventGetFlags(event));
