@@ -15,9 +15,17 @@
 #include <stdio.h>  // For printf
 #include <stdlib.h> // For system() and atexit()
 #include <string.h> // For strcmp
+#include <unistd.h> // For access() and getpid()
+#include <signal.h> // For signal handling
+#include <fcntl.h>  // For file operations
+#include <sys/file.h> // For flock()
 
 // Debug flag
 bool debug_mode = false;
+
+// Lock file path for single instance check
+#define LOCK_FILE "/tmp/dual.lock"
+int lock_fd = -1;
 
 // Define keycodes
 #define KEYCODE_SECTION 10      // § symbol - CapsLock gets remapped to this
@@ -38,6 +46,7 @@ bool debug_mode = false;
 #define KEYCODE_O 31
 #define KEYCODE_COMMA 43
 #define KEYCODE_PERIOD 47
+#define KEYCODE_SPACE 49
 
 //Global Variables to keep track of modifier keys pressed
 bool ctr = false;
@@ -51,6 +60,70 @@ uint64_t caps_press_time = 0;
 bool vim_mode_active = false;
 bool key_repeat = false;  // Flag to track key repeat
 const uint64_t HOLD_THRESHOLD = 200000000; // 200ms in nanoseconds
+
+// Variables for exit key combination
+bool escape_pressed = false;
+bool control_pressed = false;
+bool space_pressed = false;
+
+// Forward declarations
+void restore_capslock_mapping();
+uint64_t get_current_time_ns();
+void send_escape_key();
+
+// Function to clean up resources before exit
+void cleanup_and_exit() {
+	// Restore original keyboard mapping
+	restore_capslock_mapping();
+	
+	// Release the lock file
+	if (lock_fd != -1) {
+		flock(lock_fd, LOCK_UN);
+		close(lock_fd);
+		unlink(LOCK_FILE);
+	}
+	
+	if (debug_mode) {
+		printf("Exiting dual program...\n");
+	}
+	
+	exit(0);
+}
+
+// Signal handler for graceful termination
+void signal_handler(int signum) {
+	if (debug_mode) {
+		printf("Received signal %d, exiting...\n", signum);
+	}
+	cleanup_and_exit();
+}
+
+// Function to check if another instance is running
+bool is_another_instance_running() {
+	// Create or open the lock file
+	lock_fd = open(LOCK_FILE, O_CREAT | O_RDWR, 0666);
+	if (lock_fd == -1) {
+		perror("Failed to open lock file");
+		return false; // Assume no other instance is running if we can't check
+	}
+	
+	// Try to get an exclusive lock
+	if (flock(lock_fd, LOCK_EX | LOCK_NB) == -1) {
+		// Another instance has the lock
+		close(lock_fd);
+		lock_fd = -1;
+		return true;
+	}
+	
+	// Write PID to lock file
+	char pid_str[16];
+	sprintf(pid_str, "%d\n", getpid());
+	ftruncate(lock_fd, 0);
+	write(lock_fd, pid_str, strlen(pid_str));
+	
+	// We got the lock, no other instance is running
+	return false;
+}
 
 // Function to print keycode information in debug mode
 void debug_print_key(CGKeyCode keycode, CGEventType type) {
@@ -194,6 +267,24 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 	
 	// Print debug info if debug mode is on
 	debug_print_key(keycode, type);
+	
+	// Track keys for exit combination (Escape + Control + Space)
+	if (keycode == KEYCODE_ESCAPE) {
+		escape_pressed = (type == kCGEventKeyDown);
+	} else if (keycode == (CGKeyCode)59 || keycode == (CGKeyCode)62) {
+		// Control key
+		control_pressed = (type == kCGEventKeyDown || type == kCGEventFlagsChanged);
+	} else if (keycode == KEYCODE_SPACE) {
+		space_pressed = (type == kCGEventKeyDown);
+	}
+	
+	// Check for exit combination
+	if (escape_pressed && control_pressed && space_pressed) {
+		if (debug_mode) {
+			printf("Exit key combination detected (Escape + Control + Space)\n");
+		}
+		cleanup_and_exit();
+	}
 	
 	// Handle remapped CapsLock key (now Section key, keycode 10)
 	if (keycode == KEYCODE_SECTION) {
@@ -394,6 +485,18 @@ main(int argc, char* argv[])
 		}
 	}
 	
+	// Check if another instance is already running
+	if (is_another_instance_running()) {
+		fprintf(stderr, "Another instance of dual is already running.\n");
+		fprintf(stderr, "Please exit the existing instance before starting a new one.\n");
+		return 1;
+	}
+	
+	// Set up signal handlers for graceful termination
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGHUP, signal_handler);
+	
 	// Set up CapsLock remapping
 	setup_capslock_remapping();
 	
@@ -410,7 +513,8 @@ main(int argc, char* argv[])
 								eventMask, myCGEventCallback, NULL);
 	if (!eventTap) {
 		fprintf(stderr, "failed to create event tap\n");
-		exit(1);
+		cleanup_and_exit();
+		return 1;
 	}
 
 	// Create a run loop source.
@@ -423,12 +527,16 @@ main(int argc, char* argv[])
 
 	// Enable the event tap.
 	CGEventTapEnable(eventTap, true);
+	
+	if (debug_mode) {
+		printf("dual is running. Press Escape + Control + Space to exit.\n");
+	}
 
 	// Set it all running.
 	CFRunLoopRun();
 
-	// In a real program, one would have arranged for cleaning up.
-
-	exit(0);
+	// Cleanup before exit
+	cleanup_and_exit();
+	return 0;
 }
 
