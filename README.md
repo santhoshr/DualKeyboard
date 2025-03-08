@@ -21,6 +21,7 @@ DualKeyboard is **not mine.** It was written by Chance Miller of [http://dotdotc
   - Additional navigation keys: i (Page Up), o (Page Down), , (Home), . (End)
 - Single instance enforcement to prevent conflicts
 - Exit key combination: Escape + Control + Space
+- Restart key combination: Escape + 0
 
 ## Usage
 
@@ -36,6 +37,15 @@ For debug mode with detailed logging:
 ```
 ./dual -debug
 ```
+
+## Keyboard Shortcuts
+
+- **Escape + Control + Space**: Exit the program
+- **Escape + 0**: Restart the program (exit and launch again)
+- **CapsLock (tap)**: Send Escape key
+- **CapsLock (hold) + h/j/k/l**: Arrow keys (left/down/up/right)
+- **CapsLock (hold) + i/o**: Page Up/Page Down
+- **CapsLock (hold) + ,/.**: Home/End
 
 ## Emergency Restore
 

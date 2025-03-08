@@ -19,6 +19,7 @@
 #include <signal.h> // For signal handling
 #include <fcntl.h>  // For file operations
 #include <sys/file.h> // For flock()
+#include <mach-o/dyld.h> // For _NSGetExecutablePath
 
 // Debug flag
 bool debug_mode = false;
@@ -47,6 +48,7 @@ int lock_fd = -1;
 #define KEYCODE_COMMA 43
 #define KEYCODE_PERIOD 47
 #define KEYCODE_SPACE 49
+#define KEYCODE_ZERO 29        // 0 key
 
 //Global Variables to keep track of modifier keys pressed
 bool ctr = false;
@@ -65,6 +67,10 @@ const uint64_t HOLD_THRESHOLD = 200000000; // 200ms in nanoseconds
 bool escape_pressed = false;
 bool control_pressed = false;
 bool space_pressed = false;
+
+// Variables for restart key combination
+bool zero_pressed = false;
+bool should_restart = false;
 
 // Forward declarations
 void restore_capslock_mapping();
@@ -85,6 +91,31 @@ void cleanup_and_exit() {
 	
 	if (debug_mode) {
 		printf("Exiting dual program...\n");
+		if (should_restart) {
+			printf("Restarting program...\n");
+		}
+	}
+	
+	// If restart is requested, restart the program
+	if (should_restart) {
+		// Get the path to the current executable
+		char path[1024];
+		uint32_t size = sizeof(path);
+		if (_NSGetExecutablePath(path, &size) == 0) {
+			// Prepare arguments
+			char *args[3];
+			args[0] = path;
+			args[1] = debug_mode ? "-debug" : NULL;
+			args[2] = NULL;
+			
+			// Execute the program
+			execv(path, args);
+			
+			// If execv fails, print error
+			perror("Failed to restart program");
+		} else {
+			fprintf(stderr, "Failed to get executable path\n");
+		}
 	}
 	
 	exit(0);
@@ -276,6 +307,8 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 		control_pressed = (type == kCGEventKeyDown || type == kCGEventFlagsChanged);
 	} else if (keycode == KEYCODE_SPACE) {
 		space_pressed = (type == kCGEventKeyDown);
+	} else if (keycode == KEYCODE_ZERO) {
+		zero_pressed = (type == kCGEventKeyDown);
 	}
 	
 	// Check for exit combination
@@ -283,6 +316,15 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 		if (debug_mode) {
 			printf("Exit key combination detected (Escape + Control + Space)\n");
 		}
+		cleanup_and_exit();
+	}
+	
+	// Check for restart combination (Escape + 0)
+	if (escape_pressed && zero_pressed) {
+		if (debug_mode) {
+			printf("Restart key combination detected (Escape + 0)\n");
+		}
+		should_restart = true;
 		cleanup_and_exit();
 	}
 	
