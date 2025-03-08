@@ -12,4 +12,40 @@ DualKeyboard is a small utility to allow the use of modifier keys "across" exter
 
 DualKeyboard is **not mine.** It was written by Chance Miller of [http://dotdotcomorg.net/](http://dotdotcomorg.net/). I have preserved it on GitHub in case his site disappears from the Internet.
 
-To use, simply compile using `Makefile` and then run `./alterkeys`. You may need to check "Enable access for assistive devices" in the Universal Access preference pane if you haven't done so already.
+## Features
+
+- Cross-keyboard modifier keys (Control, Shift, Command, Option)
+- Vim-style navigation mode using CapsLock as modifier key
+  - Tap CapsLock for Escape
+  - Hold CapsLock and use h,j,k,l for arrow keys
+  - Additional navigation keys: i (Page Up), o (Page Down), , (Home), . (End)
+- Single instance enforcement to prevent conflicts
+- Exit key combination: Escape + Control + Space
+
+## Usage
+
+To use, simply compile using `Makefile` and then run `./dual`. You may need to check "Enable access for assistive devices" in the Universal Access preference pane if you haven't done so already.
+
+```
+make
+./dual
+```
+
+For debug mode with detailed logging:
+
+```
+./dual -debug
+```
+
+## Emergency Restore
+
+If the program crashes or terminates unexpectedly, your CapsLock key might remain remapped. To restore the original CapsLock functionality, run the included shell script:
+
+```
+./restore-capslock.sh
+```
+
+This script will:
+1. Restore the original CapsLock functionality
+2. Remove any lock files left by the program
+3. Allow you to restart the program if desired
