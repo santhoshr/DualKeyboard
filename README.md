@@ -1,5 +1,7 @@
 ![Dual Wielding](dual.jpg)
 
+# DualKeyboard v1.0.0
+
 ## Warning and a suggestion
 
 This utility has a few bugs that can randomly cause it stop working under quite a few situations. Someone else has put together a new version of the tool based on the same original source. Although I haven't had a chance to try this other utlity, I recommend you do so! It's bound to be better and less buggy:

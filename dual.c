@@ -21,6 +21,9 @@
 #include <sys/file.h> // For flock()
 #include <mach-o/dyld.h> // For _NSGetExecutablePath
 
+// Version information
+#define DUAL_VERSION "1.0.0"
+
 // Debug flag
 bool debug_mode = false;
 
@@ -617,11 +620,13 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
 int
 main(int argc, char* argv[])
 {
-	// Parse command line arguments
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-debug") == 0) {
 			debug_mode = true;
-			printf("Debug mode enabled. Key events will be printed.\n");
+			printf("Debug mode enabled\n");
+		} else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
+			printf("DualKeyboard version %s\n", DUAL_VERSION);
+			return 0;
 		}
 	}
 	
