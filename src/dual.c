@@ -43,7 +43,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             if (debug_mode) {
                 printf("Vim navigation mode unlocked with Escape\n");
             }
-            update_status_bar_icon('I');  // Update status bar to show Insert mode
+            update_status_msg('I');  // Update status bar to show Insert mode
         }
     } else if (keycode == (CGKeyCode)59 || keycode == (CGKeyCode)62) {
         // Control key
@@ -78,7 +78,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
         if (debug_mode) {
             printf("Vim navigation mode locked with Escape + 1\n");
         }
-        update_status_bar_icon('N');  // Update status bar to show Navigation mode
+        update_status_msg('N');  // Update status bar to show Navigation mode
         return NULL; // Suppress the 1 key
     }
     
@@ -94,6 +94,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             if (debug_mode) {
                 printf("Vim navigation mode unlocked with Shift+I\n");
             }
+            update_status_msg('I');  // Update status when exiting with Shift+I
             return NULL; // Suppress the Shift+I key to avoid unwanted input
         }
         // If it's just I without Shift, let it continue to the vim navigation handling below
@@ -119,7 +120,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
                     if (debug_mode) {
                         printf("Vim navigation mode unlocked with CapsLock\n");
                     }
-                    update_status_bar_icon('I');  // Update status bar to show Insert mode
+                    update_status_msg('I');  // Update status bar to show Insert mode
                 }
                 
                 key_repeat = false;
@@ -162,6 +163,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
                     if (debug_mode) {
                         printf("Vim navigation mode deactivated\n");
                     }
+                    update_status_msg('I');  // Update status when exiting navigation mode
                 }
             }
             
@@ -181,6 +183,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
         if (debug_mode) {
             printf("Vim navigation mode locked with Capslock + n\n");
         }
+        update_status_msg('N');  // Update status when locking with CapsLock + n
         return NULL; // Suppress the n key
     }
     
@@ -207,7 +210,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
                 if (debug_mode) {
                     printf("Vim navigation mode activated\n");
                 }
-                update_status_bar_icon('N');  // Update status bar to show Navigation mode
+                update_status_msg('N');  // Update status bar to show Navigation mode
             }
         }
         
