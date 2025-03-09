@@ -6,7 +6,7 @@
 @interface DualKeyboardManager : NSObject
 
 @property (nonatomic, assign) BOOL debugMode;
-@property (nonatomic, assign) BOOL quietMode;
+@property (nonatomic, assign) BOOL debugModeAtStartup;  // Track if debug was enabled at launch
 @property (nonatomic, assign) BOOL shouldRestart;
 @property (nonatomic, assign) char currentMode;
 @property (nonatomic, strong) NSStatusItem *statusItem;

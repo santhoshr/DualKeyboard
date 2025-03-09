@@ -19,7 +19,7 @@ static void *LockFileDescriptorKey = &LockFileDescriptorKey;
 - (BOOL)ensureSingleInstance {
     int fd = open("/tmp/dual.lock", O_CREAT | O_RDWR, 0600);
     if (fd == -1) {
-        if (!self.quietMode) {
+        if (self.debugMode) {
             fprintf(stderr, "Failed to open lock file: %s\n", strerror(errno));
         }
         return NO;
@@ -27,13 +27,13 @@ static void *LockFileDescriptorKey = &LockFileDescriptorKey;
     
     if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
         if (errno == EWOULDBLOCK) {
-            if (!self.quietMode) {
+            if (self.debugMode) {
                 fprintf(stderr, "Another instance of DualKeyboard is already running\n");
             }
             close(fd);
             return NO;
         }
-        if (!self.quietMode) {
+        if (self.debugMode) {
             fprintf(stderr, "Failed to lock file: %s\n", strerror(errno));
         }
         close(fd);

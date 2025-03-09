@@ -41,7 +41,6 @@
 
 // Global variables
 extern bool debug_mode;
-extern bool quiet_mode;
 extern int lock_fd;
 extern bool should_restart;
 

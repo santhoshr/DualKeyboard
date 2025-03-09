@@ -30,9 +30,5 @@
     <false/>
     <key>NSSupportsAutomaticGraphicsSwitching</key>
     <true/>
-    <key>CFBundleArguments</key>
-    <array>
-        <string>-q</string>
-    </array>
 </dict>
 </plist>

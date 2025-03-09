@@ -9,8 +9,11 @@ rm -rf "$APP_NAME"
 # Create bundle structure
 mkdir -p "$CONTENTS"/{MacOS,Resources}
 
-# Copy binary
-cp /usr/local/bin/dual "$CONTENTS/MacOS/"
+# First ensure we have a fresh build
+make clean && make
+
+# Copy binary directly from our build output
+cp bin/dual "$CONTENTS/MacOS/"
 chmod +x "$CONTENTS/MacOS/dual"
 
 # Copy Info.plist

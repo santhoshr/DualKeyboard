@@ -12,7 +12,7 @@
     [self.statusMenu addItemWithTitle:@"Mode: Insert" action:nil keyEquivalent:@""];
     [self.statusMenu addItem:[NSMenuItem separatorItem]];
     
-    if (!self.quietMode) {
+    if (self.debugMode) {
         NSMenuItem *debugItem = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Debug: %@", self.debugMode ? @"ON" : @"OFF"] 
                                                           action:@selector(toggleDebugMode) 
                                                    keyEquivalent:@""];
@@ -40,21 +40,18 @@
     modeItem.title = [NSString stringWithFormat:@"Mode: %@", 
                       self.currentMode == 'I' ? @"Insert" : @"Navigation"];
     
-    if (!self.quietMode) {
-        NSMenuItem *debugItem = [self.statusMenu itemAtIndex:2];
-        debugItem.title = [NSString stringWithFormat:@"Debug: %@", 
-                          self.debugMode ? @"ON" : @"OFF"];
-    }
+    NSMenuItem *debugItem = [self.statusMenu itemAtIndex:2];
+    debugItem.title = [NSString stringWithFormat:@"Debug: %@", 
+                        self.debugMode ? @"ON" : @"OFF"];
+
 }
 
 - (void)toggleDebugMode {
     self.debugMode = !self.debugMode;
     [self updateMenuBarStatus];
     
-    if (!self.quietMode) {
-        printf("\nDebug messages %s\n", self.debugMode ? "enabled" : "disabled");
-        fflush(stdout);
-    }
+    printf("\nDebug messages %s\n", self.debugMode ? "enabled" : "disabled");
+    fflush(stdout);
 }
 
 - (void)exitApplication {

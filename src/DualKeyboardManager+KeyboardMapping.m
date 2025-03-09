@@ -1,5 +1,6 @@
 #import "DualKeyboardManager+KeyboardMapping.h"
 #import "DualKeyboardManager+CapsNavigation.h"
+#import "DualKeyboardManager+MenuBar.h"
 #import <mach/mach_time.h>
 
 // Key tracking for shortcuts
@@ -9,11 +10,15 @@ static BOOL spacePressed = NO;
 static BOOL zeroPressed = NO;
 static BOOL minusPressed = NO;
 
-// Modifier states
-static BOOL ctr = NO;
-static BOOL sft = NO;
-static BOOL cmd = NO;
-static BOOL opt = NO;
+// Modifier key states
+static BOOL leftShiftDown = NO;
+static BOOL rightShiftDown = NO;
+static BOOL leftControlDown = NO;
+static BOOL rightControlDown = NO;
+static BOOL leftCommandDown = NO;
+static BOOL rightCommandDown = NO;
+static BOOL leftOptionDown = NO;
+static BOOL rightOptionDown = NO;
 
 @implementation DualKeyboardManager (KeyboardMapping)
 
@@ -24,7 +29,6 @@ static BOOL opt = NO;
     
     NSMutableArray *args = [NSMutableArray array];
     if (self.debugMode) [args addObject:@"-d"];
-    if (self.quietMode) [args addObject:@"-q"];
     task.arguments = args;
     
     [task launch];
@@ -38,46 +42,65 @@ static BOOL opt = NO;
         return YES;
     }
     
-    // Handle modifier keys 
+    // Handle modifier keys
     if (type == kCGEventFlagsChanged) {
-        // Preserve non-modifier flags
-        CGEventFlags preservedFlags = flags & ~(kCGEventFlagMaskControl | kCGEventFlagMaskShift | 
-                                              kCGEventFlagMaskCommand | kCGEventFlagMaskAlternate);
-        
-        // Update modifier states based on current flags
-        ctr = ((flags & kCGEventFlagMaskControl) != 0);
-        sft = ((flags & kCGEventFlagMaskShift) != 0);
-        cmd = ((flags & kCGEventFlagMaskCommand) != 0);
-        opt = ((flags & kCGEventFlagMaskAlternate) != 0);
-        
-        // Update control pressed state for shortcuts
-        controlPressed = ctr;
-        
-        // Build new flags
-        CGEventFlags newFlags = preservedFlags;
-        if (ctr) newFlags |= kCGEventFlagMaskControl;
-        if (sft) newFlags |= kCGEventFlagMaskShift;
-        if (cmd) newFlags |= kCGEventFlagMaskCommand;
-        if (opt) newFlags |= kCGEventFlagMaskAlternate;
-        
-        CGEventSetFlags(event, newFlags);
-        
-        if (self.debugMode) {
-            NSLog(@"Modifier flags changed - ctrl:%d shift:%d cmd:%d opt:%d", ctr, sft, cmd, opt);
+        // Track individual modifier keys
+        switch (keycode) {
+            case 56:  // Left shift
+                leftShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                break;
+            case 60:  // Right shift
+                rightShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                break;
+            case 59:  // Left control
+                leftControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                break;
+            case 62:  // Right control
+                rightControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                break;
+            case 58:  // Left option
+                leftOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                break;
+            case 61:  // Right option
+                rightOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                break;
+            case 55:  // Left command
+                leftCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                break;
+            case 54:  // Right command
+                rightCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                break;
         }
         
+        // Build combined modifier flags
+        CGEventFlags newFlags = 0;
+        if (leftShiftDown || rightShiftDown) newFlags |= kCGEventFlagMaskShift;
+        if (leftControlDown || rightControlDown) newFlags |= kCGEventFlagMaskControl;
+        if (leftOptionDown || rightOptionDown) newFlags |= kCGEventFlagMaskAlternate;
+        if (leftCommandDown || rightCommandDown) newFlags |= kCGEventFlagMaskCommand;
+        
+        // Update control pressed state for shortcuts
+        controlPressed = leftControlDown || rightControlDown;
+        
+        if (self.debugMode) {
+            NSLog(@"Modifier update - shift:%d ctrl:%d opt:%d cmd:%d", 
+                  (leftShiftDown || rightShiftDown),
+                  (leftControlDown || rightControlDown),
+                  (leftOptionDown || rightOptionDown),
+                  (leftCommandDown || rightCommandDown));
+        }
+        
+        CGEventSetFlags(event, newFlags);
         return NO;
     }
     
-    // For normal key events, apply current modifier states
+    // For normal key events, apply combined modifier states
     if (type == kCGEventKeyDown || type == kCGEventKeyUp) {
-        CGEventFlags preservedFlags = flags & ~(kCGEventFlagMaskControl | kCGEventFlagMaskShift | 
-                                              kCGEventFlagMaskCommand | kCGEventFlagMaskAlternate);
-        CGEventFlags newFlags = preservedFlags;
-        if (ctr) newFlags |= kCGEventFlagMaskControl;
-        if (sft) newFlags |= kCGEventFlagMaskShift;
-        if (cmd) newFlags |= kCGEventFlagMaskCommand;
-        if (opt) newFlags |= kCGEventFlagMaskAlternate;
+        CGEventFlags newFlags = 0;
+        if (leftShiftDown || rightShiftDown) newFlags |= kCGEventFlagMaskShift;
+        if (leftControlDown || rightControlDown) newFlags |= kCGEventFlagMaskControl;
+        if (leftOptionDown || rightOptionDown) newFlags |= kCGEventFlagMaskAlternate;
+        if (leftCommandDown || rightCommandDown) newFlags |= kCGEventFlagMaskCommand;
         
         CGEventSetFlags(event, newFlags);
     }
@@ -130,8 +153,9 @@ static BOOL opt = NO;
     if (keycode == 27) {
         if (type == kCGEventKeyDown) {
             minusPressed = YES;
-            if (escapePressed && !self.quietMode) {
+            if (escapePressed && self.debugModeAtStartup) {  // Check if debug was enabled at startup
                 self.debugMode = !self.debugMode;
+                [self updateMenuBarStatus];
                 printf("\nDebug messages %s\n", self.debugMode ? "enabled" : "disabled");
                 return YES;
             }

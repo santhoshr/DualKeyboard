@@ -25,6 +25,9 @@ static mach_timebase_info_data_t timebaseInfo;
     
     // Remap CapsLock to Section key
     NSTask *task = [[NSTask alloc] init];
+    NSPipe *pipe = [NSPipe pipe];
+    task.standardOutput = pipe;
+    task.standardError = pipe;
     task.launchPath = @"/usr/bin/hidutil";
     task.arguments = @[@"property", @"--set", @"{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\":0x700000039,\"HIDKeyboardModifierMappingDst\":0x700000064}]}"];
     [task launch];
@@ -37,6 +40,9 @@ static mach_timebase_info_data_t timebaseInfo;
 
 - (void)restoreCapsLockMapping {
     NSTask *task = [[NSTask alloc] init];
+    NSPipe *pipe = [NSPipe pipe];
+    task.standardOutput = pipe;
+    task.standardError = pipe;
     task.launchPath = @"/usr/bin/hidutil";
     task.arguments = @[@"property", @"--set", @"{\"UserKeyMapping\":[]}"];
     [task launch];
@@ -201,21 +207,49 @@ static mach_timebase_info_data_t timebaseInfo;
         }
         
         if (shouldRemap) {
-            CGEventSourceRef source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+            static CGEventSourceRef source = NULL;
+            if (!source) {
+                source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+            }
+            
             if (source) {
-                CGEventRef newEventDown = CGEventCreateKeyboardEvent(source, newKeycode, true);
-                CGEventRef newEventUp = CGEventCreateKeyboardEvent(source, newKeycode, false);
-                
-                CGEventSetFlags(newEventDown, flags);
-                CGEventSetFlags(newEventUp, flags);
-                
-                CGEventPost(kCGHIDEventTap, newEventDown);
-                usleep(1000);
-                CGEventPost(kCGHIDEventTap, newEventUp);
-                
-                CFRelease(newEventDown);
-                CFRelease(newEventUp);
-                CFRelease(source);
+                CGEventRef newEvent = CGEventCreateKeyboardEvent(source, newKeycode, true);
+                CGEventSetFlags(newEvent, flags);
+                CGEventSetIntegerValueField(newEvent, kCGKeyboardEventAutorepeat, 
+                    CGEventGetIntegerValueField(event, kCGKeyboardEventAutorepeat));
+                CGEventPost(kCGHIDEventTap, newEvent);
+                CFRelease(newEvent);
+                return YES;
+            }
+        }
+    } else if ((vimModeActive || vimModeLocked) && type == kCGEventKeyUp) {
+        // Handle key up events for vim navigation keys
+        CGKeyCode newKeycode = 0;
+        BOOL shouldRemap = YES;
+        
+        switch (keycode) {
+            case 4:  newKeycode = 123; break; // h -> left
+            case 38: newKeycode = 125; break; // j -> down
+            case 40: newKeycode = 126; break; // k -> up
+            case 37: newKeycode = 124; break; // l -> right
+            case 34: newKeycode = 116; break; // i -> page up
+            case 31: newKeycode = 121; break; // o -> page down
+            case 43: newKeycode = 115; break; // , -> home
+            case 47: newKeycode = 119; break; // . -> end
+            default: shouldRemap = NO; break;
+        }
+        
+        if (shouldRemap) {
+            static CGEventSourceRef source = NULL;
+            if (!source) {
+                source = CGEventSourceCreate(kCGEventSourceStateHIDSystemState);
+            }
+            
+            if (source) {
+                CGEventRef newEvent = CGEventCreateKeyboardEvent(source, newKeycode, false);
+                CGEventSetFlags(newEvent, flags);
+                CGEventPost(kCGHIDEventTap, newEvent);
+                CFRelease(newEvent);
                 return YES;
             }
         }

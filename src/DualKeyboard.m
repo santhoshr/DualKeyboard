@@ -27,7 +27,7 @@
 - (instancetype)init {
     if (self = [super init]) {
         _debugMode = NO;
-        _quietMode = NO;
+        _debugModeAtStartup = NO;
         _shouldRestart = NO;
         _currentMode = MODE_INSERT;
     }
@@ -69,7 +69,7 @@ static CGEventRef eventCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
     DualKeyboardManager *manager = (__bridge DualKeyboardManager *)refcon;
     CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     
-    if (manager.debugMode && !manager.quietMode) {
+    if (manager.debugMode) {
         NSLog(@"Event: %d, KeyCode: %d", (int)type, (int)keycode);
     }
     
