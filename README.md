@@ -1,6 +1,6 @@
 ![Dual Wielding](dual.jpg)
 
-# DualKeyboard v1.0.0
+# DualKeyboard v2.0.0
 
 ## Warning and a suggestion
 
@@ -24,6 +24,8 @@ DualKeyboard is **not mine.** It was written by Chance Miller of [http://dotdotc
 - Single instance enforcement to prevent conflicts
 - Exit key combination: Escape + Control + Space
 - Restart key combination: Escape + 0
+- Status display showing current mode (Insert/Navigation)
+- Quiet mode for background operation
 
 ## Usage
 
@@ -31,14 +33,14 @@ To use, simply compile using `Makefile` and then run `./dual`. You may need to c
 
 ```
 make
-./dual
+./dual [OPTIONS]
 ```
 
-For debug mode with detailed logging:
-
-```
-./dual -debug
-```
+Available options:
+- `-d, --debug`: Enable debug mode with detailed logging
+- `-q, --quiet`: Quiet mode, suppress non-error output
+- `-v, --version`: Show version information
+- `-h, --help`: Show help message
 
 ## Keyboard Shortcuts
 
@@ -48,6 +50,39 @@ For debug mode with detailed logging:
 - **CapsLock (hold) + h/j/k/l**: Arrow keys (left/down/up/right)
 - **CapsLock (hold) + i/o**: Page Up/Page Down
 - **CapsLock (hold) + ,/.**: Home/End
+- **Escape + 1** or **CapsLock + n**: Lock vim navigation mode
+- **Escape** or **CapsLock** or **Shift + I**: Exit vim navigation mode
+
+## Status Display
+
+The program shows the current state in the terminal:
+- Shows current mode (I for Insert, N for Navigation)
+- Displays mode changes in real-time
+- Can be disabled with `-q` flag for background operation
+
+## LaunchAgent/LaunchDaemon Setup
+
+When using DualKeyboard as a background service, use the quiet mode flag:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.dualkeyboard</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/path/to/dual</string>
+        <string>-q</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+</dict>
+</plist>
+```
 
 ## Emergency Restore
 
