@@ -8,3 +8,6 @@ dual
 
 # macOS specific
 .DS_Store 
+
+# ide
+.vscode/
