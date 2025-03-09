@@ -5,6 +5,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include "../include/capslock.h"
 #include "../include/navigation.h"
+#include "../include/termstatus.h"
 #include "../include/common.h"
 
 // Version information
@@ -42,6 +43,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             if (debug_mode) {
                 printf("Vim navigation mode unlocked with Escape\n");
             }
+            update_status_bar_icon('I');  // Update status bar to show Insert mode
         }
     } else if (keycode == (CGKeyCode)59 || keycode == (CGKeyCode)62) {
         // Control key
@@ -76,6 +78,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
         if (debug_mode) {
             printf("Vim navigation mode locked with Escape + 1\n");
         }
+        update_status_bar_icon('N');  // Update status bar to show Navigation mode
         return NULL; // Suppress the 1 key
     }
     
@@ -116,6 +119,7 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
                     if (debug_mode) {
                         printf("Vim navigation mode unlocked with CapsLock\n");
                     }
+                    update_status_bar_icon('I');  // Update status bar to show Insert mode
                 }
                 
                 key_repeat = false;
@@ -197,12 +201,13 @@ myCGEventCallback(CGEventTapProxy proxy, CGEventType type,
             uint64_t hold_duration = current_time - caps_press_time;
             should_process_vim_keys = (hold_duration >= HOLD_THRESHOLD);
             
-            // Only update the menu bar icon when we've held long enough to enter vim mode
+            // Only update the status bar icon when we've held long enough to enter vim mode
             if (should_process_vim_keys && !vim_mode_active) {
                 vim_mode_active = true;
                 if (debug_mode) {
                     printf("Vim navigation mode activated\n");
                 }
+                update_status_bar_icon('N');  // Update status bar to show Navigation mode
             }
         }
         
@@ -396,6 +401,9 @@ main(int argc, char* argv[])
 
     // Set up CapsLock remapping
     setup_capslock_remapping();
+    
+    // Set up initial status bar display
+    setup_status_bar();
     
     // Register the cleanup function to be called on program exit
     atexit(restore_capslock_mapping);

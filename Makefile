@@ -25,7 +25,3 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 clean:
 	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Add menu bar support (currently disabled)
-menubar:
-	$(CC) $(CFLAGS) -o $(BIN_DIR)/dual_menu $(SOURCES) $(LDFLAGS) -framework AppKit

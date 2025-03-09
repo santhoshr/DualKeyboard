@@ -1,9 +1,9 @@
-#include "../include/menubar.h"
+#include "../include/termstatus.h"
 
 // Current mode
 static char current_mode = MODE_INSERT;
 
-void setup_menu_bar() {
+void setup_status_bar() {
     if (quiet_mode) return;
     
     printf("\n\033[1;36m╔════════════════════════════╗\033[0m\n");
@@ -15,7 +15,7 @@ void setup_menu_bar() {
     fflush(stdout);
 }
 
-void update_menu_bar_icon(char mode) {
+void update_status_bar_icon(char mode) {
     if (mode != MODE_INSERT && mode != MODE_NAVIGATION) {
         return;
     }
@@ -38,7 +38,7 @@ void update_menu_bar_icon(char mode) {
     }
 }
 
-void cleanup_menu_bar() {
+void cleanup_status_bar() {
     if (quiet_mode) return;
     
     printf("\n\033[1;31m╔════════════════════════════╗\033[0m\n");

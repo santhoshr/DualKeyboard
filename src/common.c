@@ -1,7 +1,7 @@
 #include "../include/common.h"
 #include "../include/capslock.h"
 #include "../include/navigation.h"
-#include "../include/menubar.h"
+#include "../include/termstatus.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,8 +23,8 @@ void cleanup_and_exit() {
     // Restore original keyboard mapping
     restore_capslock_mapping();
     
-    // Clean up menu bar
-    cleanup_menu_bar();
+    // Clean up status bar
+    cleanup_status_bar();
     
     // Release the lock file
     if (lock_fd != -1) {
