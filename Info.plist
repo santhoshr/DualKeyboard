@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.santhoshr.dual</string>
+    <key>CFBundleName</key>
+    <string>dual</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>This application needs to monitor system events.</string>
+    <key>NSInputMonitoringUsageDescription</key>
+    <string>This application needs access to input monitoring.</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleExecutable</key>
+    <string>dual</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSBackgroundOnly</key>
+    <true/>
+    <key>NSRequiresAquaSystemAppearance</key>
+    <false/>
+    <key>NSSupportsAutomaticGraphicsSwitching</key>
+    <true/>
+    <key>CFBundleArguments</key>
+    <array>
+        <string>-q</string>
+    </array>
+</dict>
+</plist>

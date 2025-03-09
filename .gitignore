@@ -11,3 +11,6 @@ dual
 
 # ide
 .vscode/
+
+# build
+Dual.app

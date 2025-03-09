@@ -156,3 +156,12 @@ This script will:
 1. Restore the original CapsLock functionality
 2. Remove any lock files left by the program
 3. Allow you to restart the program if desired
+
+## Optional App bundle
+
+1. Run `./build.sh` to create the app bundle
+2. Move `Dual.app` to `/Applications`
+3. Add to System Settings > General > Login Items
+4. Grant permissions in System Settings > Privacy & Security > Accessibility
+
+This will allow one to add to login items instead of dealing with LaunchAgents/Daemons and permissions, since ObjC code increased complexity and menu bar feature
