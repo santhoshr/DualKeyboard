@@ -1,0 +1,10 @@
+# Object files
+*.o
+obj/
+
+# Binary/executable
+bin/dual
+dual
+
+# macOS specific
+.DS_Store 
