@@ -2,17 +2,19 @@
 
 # DualKeyboard v4.0.0
 
-## Warning and a suggestion
-
-This utility has a few bugs that can randomly cause it stop working under quite a few situations. Someone else has put together a new version of the tool based on the same original source. Although I haven't had a chance to try this other utlity, I recommend you do so! It's bound to be better and less buggy:
-
-[https://github.com/mejedi/my-multiple-keyboards](https://github.com/mejedi/my-multiple-keyboards)
-
-## DualKeyboard
+## About
 
 DualKeyboard is a small utility to allow the use of modifier keys "across" external keyboards in OS X. This is useful for people who want to use multiple external keyboards in a split-keyboard arrangement, or because they use a foot pedal or other assistive device.
 
-DualKeyboard is **not mine.** It was written by Chance Miller of [http://dotdotcomorg.net/](http://dotdotcomorg.net/). I have preserved it on GitHub in case his site disappears from the Internet.
+DualKeyboard is **not mine.** It was written by [Chance Miller](http://dotdotcomorg.net/dual). [Phillip Calvin](https://github.com/pnc/dual-keyboards) preserved it on GitHub. 
+
+I used Claude/Other models to customize and improve it for replacing Karabiner Elements/Kanata for simple dual keyboard use, vim style navigation, KeyCastr style key display for keyboard testing. 
+
+*This replaces capslock to emit special character and remap special character because dealing with capslock state was inconsistent. So it might not work, or you need need to customize for your system.*
+
+## Disclaimer
+
+This project is untested and requires prior coding knowledge to use and modify. The authors and contributors are not responsible for any damages or issues that may arise from using this software. Use it at your own risk. This project also includes untested AI-generated code.
 
 ## Features
 
@@ -21,13 +23,37 @@ DualKeyboard is **not mine.** It was written by Chance Miller of [http://dotdotc
   - Tap CapsLock for Escape
   - Hold CapsLock and use h,j,k,l for arrow keys
   - Additional navigation keys: i (Page Up), o (Page Down), , (Home), . (End)
+  - Lock navigation mode with Capslock + n or Escape + 1
 - Single instance enforcement to prevent conflicts
 - Exit key combination: Escape + Control + Space
-- Restart key combination: Escape + 0
-- Status display showing current mode (Insert/Navigation)
-- Quiet mode for background operation
+- Restart key combination: Escape + 0; when eventually keyboard starts misbehave/lockup
 
-## Usage
+### New in latest versions
+
+- Check current mode in menu icon
+- Status display in terminal, menubar showing current mode (Insert/Navigation)
+- Display GUI Key Display with Escape + =  to show modifiers and keys much like xev
+- Use Debug window with Escape + - (minus) for detailed view
+
+## Usage 
+
+You need to create ```dual-codesign-cert``` for signing follow [this](https://github.com/nikitabobko/AeroSpace/blob/main/dev-docs/development.md#2-create-codesign-certificate) and create similar one for DualKeyboard.
+
+```
+make clean && make && ./build.sh
+```
+This will result in Dual.app which you can use to run, you need to give assistive application permission in macos.  
+
+#### Accessibility Permission
+Grant permissions in System Settings > Privacy & Security > Accessibility
+
+#### Startup
+Add to System Settings > General > Login Items
+to start automatically. 
+
+
+
+## Usage Prior to v2.0.0
 
 To use, simply compile using `Makefile` and then run `./bin/dual`. You may need to check "Enable access for assistive devices" in the Universal Access preference pane if you haven't done so already.
 
@@ -42,11 +68,13 @@ Available options:
 - `-v, --version`: Show version information
 - `-h, --help`: Show help message
 
+
 ## Keyboard Shortcuts
 
 - **Escape + Control + Space**: Exit the program
 - **Escape + 0**: Restart the program (exit and launch again)
-- **Escape + -**: Toggle debug messages (only when debug mode is active and quiet mode is not enabled)
+- **Escape + -**: Toggle debug messages (only when debug mode is active and quiet mode is not enabled) (quiet mode is default in latest versions no -q flag as well)
+- **Escape + +**: Toggle **Key Display**  (v4.0.0)
 - **CapsLock (tap)**: Send Escape key
 - **CapsLock (hold) + h/j/k/l**: Arrow keys (left/down/up/right)
 - **CapsLock (hold) + i/o**: Page Up/Page Down
@@ -56,93 +84,14 @@ Available options:
 
 ## Status Display
 
-The program shows the current state in the terminal:
+The program shows the current state in the terminal when you start with -d or --debug:
 - Shows current mode (I for Insert, N for Navigation)
 - Displays mode changes in real-time
 - Shows debug messages when enabled (can be toggled with Escape + -)
-- Can be disabled with `-q` flag for background operation
-
-## LaunchAgent/LaunchDaemon Setup
-
-When using DualKeyboard as a background service, use the quiet mode flag. You can set it up either as a LaunchAgent (per-user) or LaunchDaemon (system-wide).
-
-### System-wide Installation (LaunchDaemon)
-
-1. Create the LaunchDaemon configuration:
-```
-sudo touch /Library/LaunchDaemons/com.user.dualkeyboard.plist
-sudo nano /Library/LaunchDaemons/com.user.dualkeyboard.plist
-```
-
-2. Add the following configuration:
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.user.dualkeyboard</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/path/to/bin/dual</string>
-        <string>-q</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <true/>
-</dict>
-</plist>
-```
-
-3. Set proper permissions:
-```
-sudo chown root:wheel /Library/LaunchDaemons/com.user.dualkeyboard.plist
-sudo chmod 644 /Library/LaunchDaemons/com.user.dualkeyboard.plist
-```
-
-4. Load and start the service:
-```
-# macOS 10.10 or later (recommended)
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.dualkeyboard.plist
-
-# Legacy method (pre-10.10)
-sudo launchctl load -w /Library/LaunchDaemons/com.user.dualkeyboard.plist
-```
-
-### Managing the Service
-
-Check if the service is running:
-```
-sudo launchctl list | grep dualkeyboard
-```
-
-Stop and unload the service:
-```
-# macOS 10.10 or later (recommended)
-sudo launchctl bootout system /Library/LaunchDaemons/com.user.dualkeyboard.plist
-
-# Legacy method (pre-10.10)
-sudo launchctl unload -w /Library/LaunchDaemons/com.user.dualkeyboard.plist
-```
-
-Restart the service:
-```
-sudo launchctl bootout system /Library/LaunchDaemons/com.user.dualkeyboard.plist
-sudo launchctl bootstrap system /Library/LaunchDaemons/com.user.dualkeyboard.plist
-```
-
-### Troubleshooting
-
-View service logs:
-```
-sudo log show --predicate 'processImagePath contains "dual"' --last 1h
-```
-
-Check service status:
-```
-sudo launchctl print system/com.user.dualkeyboard
-```
+- Can be disabled with `-q` flag for background operation, in recent versions quiet mode is default
+- Current .app version can show debug output in GUI Window 
+- Key Display which shows you current keyboard presses in small window much like KeyCastr
+- Debug and Key Display can be used much like xev in linux for debugging keyboard output
 
 ## Emergency Restore
 
@@ -156,12 +105,3 @@ This script will:
 1. Restore the original CapsLock functionality
 2. Remove any lock files left by the program
 3. Allow you to restart the program if desired
-
-## Optional App bundle
-
-1. Run `./build.sh` to create the app bundle
-2. Move `Dual.app` to `/Applications`
-3. Add to System Settings > General > Login Items
-4. Grant permissions in System Settings > Privacy & Security > Accessibility
-
-This will allow one to add to login items instead of dealing with LaunchAgents/Daemons and permissions, since ObjC code increased complexity and menu bar feature

@@ -159,6 +159,7 @@
 @implementation DualKeyboardManager (KeyDisplay)
 
 static char keyDisplayWindowKey;
+static char lastWindowFrameKey;
 
 - (KeyDisplayWindow *)keyDisplayWindow {
     return objc_getAssociatedObject(self, &keyDisplayWindowKey);
@@ -168,13 +169,30 @@ static char keyDisplayWindowKey;
     objc_setAssociatedObject(self, &keyDisplayWindowKey, window, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
+- (NSValue *)lastWindowFrame {
+    return objc_getAssociatedObject(self, &lastWindowFrameKey);
+}
+
+- (void)setLastWindowFrame:(NSValue *)frameValue {
+    objc_setAssociatedObject(self, &lastWindowFrameKey, frameValue, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 - (void)toggleKeyDisplay {
     if (self.keyDisplayWindow) {
+        // Store the current frame before closing
+        self.lastWindowFrame = [NSValue valueWithRect:self.keyDisplayWindow.frame];
         [self.keyDisplayWindow close];
         self.keyDisplayWindow = nil;
     } else {
         KeyDisplayWindow *window = [[KeyDisplayWindow alloc] init];
-        [window center];
+        
+        // Position at last known location if available, otherwise center
+        if (self.lastWindowFrame) {
+            [window setFrame:[self.lastWindowFrame rectValue] display:YES];
+        } else {
+            [window center];
+        }
+        
         [window makeKeyAndOrderFront:nil];
         self.keyDisplayWindow = window;
     }
