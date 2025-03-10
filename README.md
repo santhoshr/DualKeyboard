@@ -1,6 +1,6 @@
-![Dual Wielding](dual.jpg)
+![DualKeyboard Logo](Resources/DualKeyboardLogo.png)
 
-# DualKeyboard v4.0.0
+# v4.0.1
 
 ## About
 
@@ -105,3 +105,41 @@ This script will:
 1. Restore the original CapsLock functionality
 2. Remove any lock files left by the program
 3. Allow you to restart the program if desired
+
+## Changelog
+
+### [v4.0.1]
+- Code Optimization
+- About window, Icon, Image, necessary bloat?
+
+### [v4.0.0]
+- HUD for key monitoring much like KeyCastr
+- consoleWindow for GUI debug messages
+
+### [v3.5.0]
+- Now you can create Dual.app to add to login items and stop dealing with LaunchAgents/Daemons
+- after adding menus/windows, launch agents needs more information regarding entitlements, so app is better
+
+### [v3.0.0]
+- Modernize codebase with Objective-C 
+- Add macOS menubar support with mode indicator and controls - Implement proper single instance handling 
+- Add keyboard status monitoring and display
+- Improve CapsLock navigation with vim-style modes 
+- Found out multi device modifiers are buggy, use v3.5.0
+- Increased memory usage by using objc but we got windows and menus which seems combersome to implement in outdated carbon framework in pure c impl
+
+### [v2.0.0]
+- Add Escape + (minus -) shortcut to toggle debug messages when debug mode is active and quiet mode is not enabled
+- terminal output status display
+- Restructure project and improve CLI
+- fast c impl with QoL updates
+
+### [v1.0.0]
+- Add semantic versioning v1.0.0
+- Add lockable vim navigation mode
+- Add restart functionality with Escape + 0
+- Add emergency restore script and update README
+- Add single instance check and exit key combination
+- Implement vim-style navigation mode and debug features
+- Original file name from https://www.middleendian.com/dual
+- this is fast c implementation
