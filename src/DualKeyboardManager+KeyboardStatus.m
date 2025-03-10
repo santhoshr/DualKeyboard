@@ -1,14 +1,24 @@
 #import "DualKeyboardManager+KeyboardStatus.h"
 #import "DualKeyboardManager+MenuBar.h"
+#import "DualKeyboardManager+ConsoleWindow.h"
+#import "NSApplication+CommandLine.h"
 
 @implementation DualKeyboardManager (KeyboardStatus)
 
 - (void)setupStatusBar {
     if (!self.debugMode) return;
-    printf("\033[1;36mDual Keyboard Start\033[0m\n");
-    printf("Current Mode: \033[1;32m%c\033[0m | Debug: \033[1;33m%s\033[0m\n", 
-           self.currentMode, self.debugMode ? "ON" : "OFF");
-    fflush(stdout);
+    
+    NSString *startMsg = @"Dual Keyboard Start\n";
+    NSString *statusMsg = [NSString stringWithFormat:@"Current Mode: %c | Debug: %s\n", 
+                          self.currentMode, self.debugMode ? "ON" : "OFF"];
+    
+    if ([NSApp isRunningFromCommandLine]) {
+        printf("\033[1;36m%s\033[0m", [startMsg UTF8String]);
+        printf("%s", [statusMsg UTF8String]);
+    } else {
+        [self appendToConsole:startMsg];
+        [self appendToConsole:statusMsg];
+    }
 }
 
 - (void)updateStatusWithMode:(char)mode {
@@ -16,12 +26,17 @@
     if (mode == self.currentMode) return;
     
     self.currentMode = mode;
-    [self updateMenuBarStatus];  // Update menubar when mode changes
+    [self updateMenuBarStatus];
     
     if (self.debugMode) {
-        printf("\033[1;33mMode Changed\033[0m -> Current: \033[1;32m%c\033[0m | Debug: \033[1;33m%s\033[0m\n",
-               self.currentMode, self.debugMode ? "ON" : "OFF");
-        fflush(stdout);
+        NSString *modeMsg = [NSString stringWithFormat:@"Mode Changed -> Current: %c | Debug: %s\n",
+                            self.currentMode, self.debugMode ? "ON" : "OFF"];
+        
+        if ([NSApp isRunningFromCommandLine]) {
+            printf("\033[1;33m%s\033[0m", [modeMsg UTF8String]);
+        } else {
+            [self appendToConsole:modeMsg];
+        }
     }
 }
 

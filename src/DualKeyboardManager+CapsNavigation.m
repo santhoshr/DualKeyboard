@@ -1,5 +1,8 @@
 #import "DualKeyboardManager+CapsNavigation.h"
 #import "DualKeyboardManager+KeyboardStatus.h"
+#import "DualKeyboardManager+ConsoleWindow.h"
+#import "DualKeyboardManager+KeyDisplay.h"
+#import "NSApplication+CommandLine.h"
 #import <mach/mach_time.h>
 
 // Navigation state tracking
@@ -76,6 +79,39 @@ static mach_timebase_info_data_t timebaseInfo;
 }
 
 - (BOOL)handleCapsNavigation:(CGEventRef)event ofType:(CGEventType)type withKeycode:(CGKeyCode)keycode flags:(CGEventFlags)flags {
+    // Access the combined modifier states from KeyboardMapping
+    extern BOOL leftShiftDown, rightShiftDown;
+    extern BOOL leftControlDown, rightControlDown; 
+    extern BOOL leftCommandDown, rightCommandDown;
+    extern BOOL leftOptionDown, rightOptionDown;
+    
+    // Update key display if active
+    [self updateKeyDisplay:keycode flags:flags isKeyDown:(type == kCGEventKeyDown)];
+    
+    if (self.debugMode) {
+        // Compute combined modifier states for display - use direct state variables
+        BOOL shiftActive = leftShiftDown || rightShiftDown;
+        BOOL ctrlActive = leftControlDown || rightControlDown;
+        BOOL optActive = leftOptionDown || rightOptionDown;
+        BOOL cmdActive = leftCommandDown || rightCommandDown;
+        
+        // Get raw flags directly from the event
+        CGEventFlags rawFlags = CGEventGetFlags(event);
+        NSString *eventType = (type == kCGEventKeyDown) ? @"KeyDown" : (type == kCGEventKeyUp) ? @"KeyUp" : @"FlagsChanged";
+        NSString *debugMsg = [NSString stringWithFormat:@"Key Event: %@ keycode=%d [flags=0x%llx] cmd:%d ctrl:%d opt:%d shift:%d\n", 
+                           eventType, (int)keycode, (unsigned long long)rawFlags,
+                           cmdActive ? 1 : 0,
+                           ctrlActive ? 1 : 0,
+                           optActive ? 1 : 0,
+                           shiftActive ? 1 : 0];
+        if ([NSApp isRunningFromCommandLine]) {
+            printf("%s", [debugMsg UTF8String]);
+            fflush(stdout);
+        } else {
+            [self appendToConsole:debugMsg];
+        }
+    }
+    
     // Handle CapsLock (Section key)
     if (keycode == 10) {
         uint64_t currentTime = mach_absolute_time();
@@ -271,6 +307,14 @@ static mach_timebase_info_data_t timebaseInfo;
         vimModeActive = YES;
         [self updateStatusWithMode:'N'];
         return YES;
+    }
+
+    // Handle Escape + Equal shortcut for key display
+    if (keycode == 24 && type == kCGEventKeyDown) {  // Equal key (=)
+        if (CGEventSourceKeyState(kCGEventSourceStateHIDSystemState, 53)) {  // Escape key
+            [self toggleKeyDisplay];
+            return YES;
+        }
     }
 
     return NO;

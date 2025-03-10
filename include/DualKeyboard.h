@@ -11,6 +11,7 @@
 @property (nonatomic, assign) char currentMode;
 @property (nonatomic, strong) NSStatusItem *statusItem;
 @property (nonatomic, strong) NSMenu *statusMenu;
+@property (nonatomic, strong) NSWindow *consoleWindow;  // Add this line
 
 + (instancetype)sharedInstance;
 - (BOOL)startEventTap;

@@ -2,22 +2,57 @@
 
 APP_NAME="Dual.app"
 CONTENTS="$APP_NAME/Contents"
+BUNDLE_ID="com.santhoshr.dual"
 
-# Clean previous build
+# Get current OS version for plist
+CURRENT_OS=$(sw_vers -buildVersion)
+MACOS_VERSION=$(sw_vers -productVersion)
+
+# Clean previous build but preserve code signing identity
+if [ -d "$APP_NAME" ]; then
+    PREV_SIGNATURE=$(codesign -dvv "$APP_NAME" 2>&1 | grep "Authority" || true)
+fi
+
 rm -rf "$APP_NAME"
-
-# Create bundle structure
 mkdir -p "$CONTENTS"/{MacOS,Resources}
 
 # First ensure we have a fresh build
 make clean && make
 
-# Copy binary directly from our build output
+# Copy binary and make executable
 cp bin/dual "$CONTENTS/MacOS/"
 chmod +x "$CONTENTS/MacOS/dual"
 
-# Copy Info.plist
-cp Info.plist "$CONTENTS/"
+# Get Development Team ID and identity
+TEAM_ID=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | cut -d '"' -f 2 | cut -d "(" -f 2 | cut -d ")" -f 1)
+IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | cut -d '"' -f 2)
 
-# Sign the app bundle with entitlements
-codesign --force --sign - --entitlements entitlements.plist --deep "$APP_NAME"
+# Process Info.plist
+sed -e "s/\$(CURRENT_MAC_OS_VERSION)/$CURRENT_OS/g" \
+    -e "s/\$(MACOSX_DEPLOYMENT_TARGET)/$MACOS_VERSION/g" \
+    -e "s/\$(DEVELOPMENT_TEAM)/$TEAM_ID/g" \
+    -e "s/\$(CURRENT_PROJECT_VERSION)/$(date +%Y%m%d.%H%M%S)/g" \
+    Info.plist > "$CONTENTS/Info.plist"
+
+# Create bundle references
+CERT_NAME="dual-codesign-cert"
+BUNDLE_REF="com.santhoshr.dual"
+
+# Proper signing with explicit certificate and bundle ID
+codesign --force \
+         --sign "$CERT_NAME" \
+         --options runtime \
+         --timestamp \
+         --identifier "$BUNDLE_REF" \
+         --entitlements entitlements.plist \
+         --deep \
+         "$APP_NAME"
+
+echo "Basic signature applied. You may need to approve in Security & Privacy settings."
+
+# Verify with explicit requirements
+echo "Verifying code signature..."
+codesign --verify --verbose=4 "$APP_NAME"
+codesign --display --entitlements - "$APP_NAME"
+spctl --assess --type execute --verbose=4 "$APP_NAME"
+

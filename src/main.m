@@ -3,6 +3,12 @@
 #import "../include/DualKeyboard.h"
 #import "DualKeyboardManager+SingleInstance.h"
 
+@implementation NSApplication (CommandLineCheck)
+- (BOOL)isRunningFromCommandLine {
+    return isatty(STDIN_FILENO);
+}
+@end
+
 void handleSignal(int sig) {
     [[DualKeyboardManager sharedInstance] cleanup];
     [[DualKeyboardManager sharedInstance] cleanupSingleInstance];
@@ -24,7 +30,7 @@ int main(int argc, const char * argv[]) {
                 manager.debugMode = YES;
                 manager.debugModeAtStartup = YES;
             } else if ([arg isEqualToString:@"--version"] || [arg isEqualToString:@"-v"]) {
-                printf("DualKeyboard version 3.5.0\n");
+                printf("DualKeyboard version 4.0.0\n");
                 return 0;
             } else if ([arg isEqualToString:@"--help"] || [arg isEqualToString:@"-h"]) {
                 printf("Usage: dual [OPTIONS]\n\n"

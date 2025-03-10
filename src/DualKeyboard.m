@@ -70,7 +70,21 @@ static CGEventRef eventCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
     CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     
     if (manager.debugMode) {
-        NSLog(@"Event: %d, KeyCode: %d", (int)type, (int)keycode);
+        // More detailed debug message that includes flag changes
+        NSString *eventTypeStr = @"Unknown";
+        switch (type) {
+            case kCGEventKeyDown:
+                eventTypeStr = @"KeyDown";
+                break;
+            case kCGEventKeyUp:
+                eventTypeStr = @"KeyUp";
+                break;
+            case kCGEventFlagsChanged:
+                eventTypeStr = @"FlagsChanged";
+                break;
+        }
+        
+        NSLog(@"Event: %@ (%d), KeyCode: %d", eventTypeStr, (int)type, (int)keycode);
     }
     
     // Handle the key event using our KeyboardMapping category

@@ -1,6 +1,9 @@
 #import "DualKeyboardManager+KeyboardMapping.h"
 #import "DualKeyboardManager+CapsNavigation.h"
 #import "DualKeyboardManager+MenuBar.h"
+#import "DualKeyboardManager+KeyDisplay.h"
+#import "DualKeyboardManager+ConsoleWindow.h"
+#import "NSApplication+CommandLine.h"
 #import <mach/mach_time.h>
 
 // Key tracking for shortcuts
@@ -10,15 +13,15 @@ static BOOL spacePressed = NO;
 static BOOL zeroPressed = NO;
 static BOOL minusPressed = NO;
 
-// Modifier key states
-static BOOL leftShiftDown = NO;
-static BOOL rightShiftDown = NO;
-static BOOL leftControlDown = NO;
-static BOOL rightControlDown = NO;
-static BOOL leftCommandDown = NO;
-static BOOL rightCommandDown = NO;
-static BOOL leftOptionDown = NO;
-static BOOL rightOptionDown = NO;
+// Modifier key states - removed static keyword to match extern declarations
+BOOL leftShiftDown = NO;
+BOOL rightShiftDown = NO;
+BOOL leftControlDown = NO;
+BOOL rightControlDown = NO;
+BOOL leftCommandDown = NO;
+BOOL rightCommandDown = NO;
+BOOL leftOptionDown = NO;
+BOOL rightOptionDown = NO;
 
 @implementation DualKeyboardManager (KeyboardMapping)
 
@@ -36,39 +39,73 @@ static BOOL rightOptionDown = NO;
 
 - (BOOL)handleKeyEvent:(CGEventRef)event ofType:(CGEventType)type withKeycode:(CGKeyCode)keycode {
     CGEventFlags flags = CGEventGetFlags(event);
+    BOOL needsUpdate = NO;
+    BOOL modifierChanged = NO;
     
     // Handle caps navigation first
     if ([self handleCapsNavigation:event ofType:type withKeycode:keycode flags:flags]) {
         return YES;
     }
     
-    // Handle modifier keys
+    // Handle modifier keys - always check current state for immediate updates
     if (type == kCGEventFlagsChanged) {
         // Track individual modifier keys
         switch (keycode) {
             case 56:  // Left shift
-                leftShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                if (leftShiftDown != ((flags & kCGEventFlagMaskShift) != 0)) {
+                    leftShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 60:  // Right shift
-                rightShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                if (rightShiftDown != ((flags & kCGEventFlagMaskShift) != 0)) {
+                    rightShiftDown = (flags & kCGEventFlagMaskShift) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 59:  // Left control
-                leftControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                if (leftControlDown != ((flags & kCGEventFlagMaskControl) != 0)) {
+                    leftControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 62:  // Right control
-                rightControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                if (rightControlDown != ((flags & kCGEventFlagMaskControl) != 0)) {
+                    rightControlDown = (flags & kCGEventFlagMaskControl) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 58:  // Left option
-                leftOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                if (leftOptionDown != ((flags & kCGEventFlagMaskAlternate) != 0)) {
+                    leftOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 61:  // Right option
-                rightOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                if (rightOptionDown != ((flags & kCGEventFlagMaskAlternate) != 0)) {
+                    rightOptionDown = (flags & kCGEventFlagMaskAlternate) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 55:  // Left command
-                leftCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                if (leftCommandDown != ((flags & kCGEventFlagMaskCommand) != 0)) {
+                    leftCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
             case 54:  // Right command
-                rightCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                if (rightCommandDown != ((flags & kCGEventFlagMaskCommand) != 0)) {
+                    rightCommandDown = (flags & kCGEventFlagMaskCommand) != 0;
+                    needsUpdate = YES;
+                    modifierChanged = YES;
+                }
                 break;
         }
         
@@ -82,12 +119,42 @@ static BOOL rightOptionDown = NO;
         // Update control pressed state for shortcuts
         controlPressed = leftControlDown || rightControlDown;
         
-        if (self.debugMode) {
-            NSLog(@"Modifier update - shift:%d ctrl:%d opt:%d cmd:%d", 
-                  (leftShiftDown || rightShiftDown),
-                  (leftControlDown || rightControlDown),
-                  (leftOptionDown || rightOptionDown),
-                  (leftCommandDown || rightCommandDown));
+        // Log modifier changes explicitly for debug purposes
+        if (self.debugMode && modifierChanged) {
+            NSString *modifierName = @"unknown";
+            NSString *modifierState = @"unknown";
+            
+            switch (keycode) {
+                case 56: modifierName = @"Left Shift"; modifierState = leftShiftDown ? @"DOWN" : @"UP"; break;
+                case 60: modifierName = @"Right Shift"; modifierState = rightShiftDown ? @"DOWN" : @"UP"; break;
+                case 59: modifierName = @"Left Control"; modifierState = leftControlDown ? @"DOWN" : @"UP"; break;
+                case 62: modifierName = @"Right Control"; modifierState = rightControlDown ? @"DOWN" : @"UP"; break;
+                case 58: modifierName = @"Left Option"; modifierState = leftOptionDown ? @"DOWN" : @"UP"; break;
+                case 61: modifierName = @"Right Option"; modifierState = rightOptionDown ? @"DOWN" : @"UP"; break;
+                case 55: modifierName = @"Left Command"; modifierState = leftCommandDown ? @"DOWN" : @"UP"; break;
+                case 54: modifierName = @"Right Command"; modifierState = rightCommandDown ? @"DOWN" : @"UP"; break;
+            }
+            
+            NSString *debugMsg = [NSString stringWithFormat:@"Modifier: %@ is %@ [cmd:%d ctrl:%d opt:%d shift:%d]\n",
+                               modifierName, modifierState,
+                               (leftCommandDown || rightCommandDown) ? 1 : 0,
+                               (leftControlDown || rightControlDown) ? 1 : 0,
+                               (leftOptionDown || rightOptionDown) ? 1 : 0,
+                               (leftShiftDown || rightShiftDown) ? 1 : 0];
+            
+            if ([NSApp isRunningFromCommandLine]) {
+                printf("%s", [debugMsg UTF8String]);
+                fflush(stdout);
+            } else {
+                [self appendToConsole:debugMsg];
+            }
+        }
+        
+        // Force update the key display with current modifiers state for immediate feedback
+        if (needsUpdate) {
+            [self updateKeyDisplay:keycode flags:flags isKeyDown:YES];
+            // Also refresh the key display modifiers to ensure it's fully up to date
+            [self refreshKeyDisplayModifiers];
         }
         
         CGEventSetFlags(event, newFlags);
@@ -153,10 +220,8 @@ static BOOL rightOptionDown = NO;
     if (keycode == 27) {
         if (type == kCGEventKeyDown) {
             minusPressed = YES;
-            if (escapePressed && self.debugModeAtStartup) {  // Check if debug was enabled at startup
-                self.debugMode = !self.debugMode;
-                [self updateMenuBarStatus];
-                printf("\nDebug messages %s\n", self.debugMode ? "enabled" : "disabled");
+            if (escapePressed) {
+                [self toggleDebugMode];
                 return YES;
             }
         } else if (type == kCGEventKeyUp) {

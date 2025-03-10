@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.santhoshr.dual</string>
+    <string>com.santhoshr.dual</string>  <!-- Keep this consistent -->
     <key>CFBundleName</key>
     <string>dual</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>This application needs to monitor system events.</string>
     <key>NSInputMonitoringUsageDescription</key>
@@ -30,5 +30,31 @@
     <false/>
     <key>NSSupportsAutomaticGraphicsSwitching</key>
     <true/>
+    <key>CFBundleShortVersionString</key>
+    <string>4.0.0</string>
+    <key>BuildMachineOSBuild</key>
+    <string>$(CURRENT_MAC_OS_VERSION)</string>
+    <key>DTCompiler</key>
+    <string>com.apple.compilers.llvm.clang.1_0</string>
+    <key>DTPlatformBuild</key>
+    <string>$(XCODE_PRODUCT_BUILD_VERSION)</string>
+    <key>DTPlatformVersion</key>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+    <key>DTSDKBuild</key>
+    <string>$(XCODE_PRODUCT_BUILD_VERSION)</string>
+    <key>DTSDKName</key>
+    <string>macosx$(MACOSX_DEPLOYMENT_TARGET)</string>
+    <key>DTXcode</key>
+    <string>$(XCODE_VERSION_ACTUAL)</string>
+    <key>DTXcodeBuild</key>
+    <string>$(XCODE_PRODUCT_BUILD_VERSION)</string>
+    <key>TeamIdentifier</key>
+    <string>$(DEVELOPMENT_TEAM)</string>
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.santhoshr.dual</string>
+    </array>
 </dict>
 </plist>
+
+
