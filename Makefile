@@ -1,6 +1,6 @@
 CC = clang
 CFLAGS = -Wall -I./include -fobjc-arc
-LDFLAGS = -framework Foundation -framework Carbon -framework ApplicationServices -framework AppKit
+LDFLAGS = -framework Foundation -framework Carbon -framework ApplicationServices -framework AppKit -framework QuartzCore
 
 SRC_DIR = src
 OBJ_DIR = obj

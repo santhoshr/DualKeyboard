@@ -27,14 +27,21 @@
         self.level = NSPopUpMenuWindowLevel;
         self.movableByWindowBackground = YES;
         
-        // Set up the visual effect view for modern UI with blur
+        // Set up the visual effect view without rounded corners
         self.visualEffectView = [[NSVisualEffectView alloc] initWithFrame:NSMakeRect(0, 0, 220, 140)]; // Increased height
         self.visualEffectView.material = NSVisualEffectMaterialHUDWindow;
         self.visualEffectView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
         self.visualEffectView.state = NSVisualEffectStateActive;
         self.visualEffectView.wantsLayer = YES;
-        self.visualEffectView.layer.cornerRadius = 12.0;
-        self.visualEffectView.layer.masksToBounds = YES;
+        
+        // Add a semi-opaque background color layer without rounded corners
+        CALayer *backgroundLayer = [CALayer layer];
+        backgroundLayer.backgroundColor = [NSColor colorWithWhite:0.0 alpha:0.3].CGColor;
+        [self.visualEffectView.layer addSublayer:backgroundLayer];
+        
+        // Configure autoresizing for the background layer
+        backgroundLayer.frame = self.visualEffectView.bounds;
+        backgroundLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
         
         // Use autoresizing for visual effect view
         self.visualEffectView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
@@ -96,7 +103,6 @@
             [btn setBezelStyle:NSBezelStyleInline];
             [btn setEnabled:NO];
             btn.wantsLayer = YES;
-            btn.layer.cornerRadius = 5;
             
             // Use system-defined colors for better dark/light mode support
             btn.layer.backgroundColor = [NSColor quaternaryLabelColor].CGColor;
@@ -135,16 +141,32 @@
     if (@available(macOS 10.14, *)) {
         // Update visual effect material based on appearance
         BOOL isDarkMode = [self.effectiveAppearance.name containsString:@"Dark"];
-        self.visualEffectView.material = isDarkMode ? 
-                                       NSVisualEffectMaterialHUDWindow : 
-                                       NSVisualEffectMaterialSheet;
-                                       
-        // Update button colors for inactive state
+        
+        // Use more solid materials in dark mode
+        if (isDarkMode) {
+            self.visualEffectView.material = NSVisualEffectMaterialToolTip;
+            // Find the background layer and adjust opacity
+            for (CALayer *layer in self.visualEffectView.layer.sublayers) {
+                if (layer.backgroundColor) {
+                    layer.backgroundColor = [NSColor colorWithWhite:0.0 alpha:0.4].CGColor;
+                }
+            }
+        } else {
+            self.visualEffectView.material = NSVisualEffectMaterialSheet;
+            // Adjust background for light mode
+            for (CALayer *layer in self.visualEffectView.layer.sublayers) {
+                if (layer.backgroundColor) {
+                    layer.backgroundColor = [NSColor colorWithWhite:1.0 alpha:0.1].CGColor;
+                }
+            }
+        }
+        
+        // Update button colors for inactive state without rounded corners
         for (NSButton *btn in self.modButtons) {
             if (btn.state != NSControlStateValueOn) {
                 btn.layer.backgroundColor = isDarkMode ? 
-                    [NSColor colorWithWhite:0.3 alpha:0.6].CGColor : 
-                    [NSColor colorWithWhite:0.9 alpha:0.6].CGColor;
+                    [NSColor colorWithWhite:0.3 alpha:0.8].CGColor : 
+                    [NSColor colorWithWhite:0.9 alpha:0.8].CGColor;
             }
         }
     }
