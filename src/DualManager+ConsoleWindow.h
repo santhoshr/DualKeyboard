@@ -1,6 +1,6 @@
-#import "DualKeyboard.h"
+#import "Dual.h"
 
-@interface DualKeyboardManager (ConsoleWindow)
+@interface DualManager (ConsoleWindow)
 
 - (void)createConsoleWindowIfNeeded;
 - (void)closeConsoleWindow;

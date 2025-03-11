@@ -1,7 +1,7 @@
-#import "DualKeyboardManager+MenuBar.h"
-#import "DualKeyboardManager+KeyboardMapping.h"
-#import "DualKeyboardManager+ConsoleWindow.h"
-#import "DualKeyboardManager+About.h"
+#import "DualManager+MenuBar.h"
+#import "DualManager+KeyboardMapping.h"
+#import "DualManager+ConsoleWindow.h"
+#import "DualManager+About.h"
 #import "NSApplication+CommandLine.h"
 #import <AppKit/AppKit.h>
 #import <objc/runtime.h>
@@ -94,7 +94,7 @@
 @end
 
 @interface DualWindowDelegate : NSObject <NSWindowDelegate>
-@property (weak) DualKeyboardManager *manager;
+@property (weak) DualManager *manager;
 @end
 
 @implementation DualWindowDelegate
@@ -106,7 +106,7 @@
 
 @end
 
-@implementation DualKeyboardManager (MenuBar)
+@implementation DualManager (MenuBar)
 
 static char consoleWindowPipeKey;
 static char originalStdoutKey;
@@ -175,7 +175,7 @@ static char originalStdoutFdKey;
     [self.statusMenu addItem:[NSMenuItem separatorItem]];
     
     // Add About menu item with proper target retention
-    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:@"About DualKeyboard" 
+    NSMenuItem *aboutItem = [[NSMenuItem alloc] initWithTitle:@"About Dual" 
                                                      action:@selector(showAboutWindow) 
                                               keyEquivalent:@"i"];
     aboutItem.keyEquivalentModifierMask = NSEventModifierFlagCommand | NSEventModifierFlagOption;

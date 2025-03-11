@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.santhoshr.dual</string>  <!-- Keep this consistent -->
+    <string>com.santhoshr.Dual</string>  <!-- Keep this consistent -->
     <key>CFBundleName</key>
-    <string>dual</string>
+    <string>Dual</string>
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSAppleEventsUsageDescription</key>
@@ -19,7 +19,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleExecutable</key>
-    <string>dual</string>
+    <string>Dual</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>
@@ -51,10 +51,10 @@
     <key>TeamIdentifier</key>
     <string>$(DEVELOPMENT_TEAM)</string>
     <key>CFBundleIconFile</key>
-    <string>DualKeyboardLogo</string>
+    <string>DualLogo</string>
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.com.santhoshr.dual</string>
+        <string>group.com.santhoshr.Dual</string>
     </array>
 </dict>
 </plist>

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
-#import "../include/DualKeyboard.h"
-#import "DualKeyboardManager+SingleInstance.h"
+#import "../include/Dual.h"
+#import "DualManager+SingleInstance.h"
 
 @implementation NSApplication (CommandLineCheck)
 - (BOOL)isRunningFromCommandLine {
@@ -36,8 +36,8 @@ NSString* readVersion() {
 }
 
 void handleSignal(int sig) {
-    [[DualKeyboardManager sharedInstance] cleanup];
-    [[DualKeyboardManager sharedInstance] cleanupSingleInstance];
+    [[DualManager sharedInstance] cleanup];
+    [[DualManager sharedInstance] cleanupSingleInstance];
     exit(0);
 }
 
@@ -47,7 +47,7 @@ int main(int argc, const char * argv[]) {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         
-        DualKeyboardManager *manager = [DualKeyboardManager sharedInstance];
+        DualManager *manager = [DualManager sharedInstance];
         
         // Parse command line arguments
         for (int i = 1; i < argc; i++) {
@@ -56,10 +56,10 @@ int main(int argc, const char * argv[]) {
                 manager.debugMode = YES;
                 manager.debugModeAtStartup = YES;
             } else if ([arg isEqualToString:@"--version"] || [arg isEqualToString:@"-v"]) {
-                printf("DualKeyboard version %s\n", [readVersion() UTF8String]);
+                printf("Dual version %s\n", [readVersion() UTF8String]);
                 return 0;
             } else if ([arg isEqualToString:@"--help"] || [arg isEqualToString:@"-h"]) {
-                printf("Usage: dual [OPTIONS]\n\n"
+                printf("Usage: Dual [OPTIONS]\n\n"
                        "Options:\n"
                        "  -d, --debug     Enable debug mode\n"
                        "  -q, --quiet     Quiet mode, suppress non-error output\n"

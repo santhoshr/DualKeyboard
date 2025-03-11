@@ -1,11 +1,11 @@
-#import "DualKeyboardManager+SingleInstance.h"
+#import "DualManager+SingleInstance.h"
 #import <sys/file.h>
 #import <errno.h>
 #import <objc/runtime.h>
 
 static void *LockFileDescriptorKey = &LockFileDescriptorKey;
 
-@implementation DualKeyboardManager (SingleInstance)
+@implementation DualManager (SingleInstance)
 
 - (void)setLockFd:(int)fd {
     objc_setAssociatedObject(self, LockFileDescriptorKey, @(fd), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -17,7 +17,7 @@ static void *LockFileDescriptorKey = &LockFileDescriptorKey;
 }
 
 - (BOOL)ensureSingleInstance {
-    int fd = open("/tmp/dual.lock", O_CREAT | O_RDWR, 0600);
+    int fd = open("/tmp/Dual.lock", O_CREAT | O_RDWR, 0600);
     if (fd == -1) {
         if (self.debugMode) {
             fprintf(stderr, "Failed to open lock file: %s\n", strerror(errno));
@@ -28,7 +28,7 @@ static void *LockFileDescriptorKey = &LockFileDescriptorKey;
     if (flock(fd, LOCK_EX | LOCK_NB) == -1) {
         if (errno == EWOULDBLOCK) {
             if (self.debugMode) {
-                fprintf(stderr, "Another instance of DualKeyboard is already running\n");
+                fprintf(stderr, "Another instance of Dual is already running\n");
             }
             close(fd);
             return NO;
@@ -49,7 +49,7 @@ static void *LockFileDescriptorKey = &LockFileDescriptorKey;
     if (fd > 0) {
         flock(fd, LOCK_UN);
         close(fd);
-        unlink("/tmp/dual.lock");
+        unlink("/tmp/Dual.lock");
         [self setLockFd:-1];
     }
 }

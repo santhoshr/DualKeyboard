@@ -1,8 +1,8 @@
-#import "DualKeyboardManager+KeyboardMapping.h"
-#import "DualKeyboardManager+CapsNavigation.h"
-#import "DualKeyboardManager+MenuBar.h"
-#import "DualKeyboardManager+KeyDisplay.h"
-#import "DualKeyboardManager+ConsoleWindow.h"
+#import "DualManager+KeyboardMapping.h"
+#import "DualManager+CapsNavigation.h"
+#import "DualManager+MenuBar.h"
+#import "DualManager+KeyDisplay.h"
+#import "DualManager+ConsoleWindow.h"
 #import "NSApplication+CommandLine.h"
 #import <mach/mach_time.h>
 
@@ -23,7 +23,7 @@ BOOL rightCommandDown = NO;
 BOOL leftOptionDown = NO;
 BOOL rightOptionDown = NO;
 
-@implementation DualKeyboardManager (KeyboardMapping)
+@implementation DualManager (KeyboardMapping)
 
 - (CGEventFlags)computeCombinedModifierFlags {
     CGEventFlags combinedFlags = 0;

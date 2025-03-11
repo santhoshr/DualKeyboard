@@ -19,7 +19,7 @@ echo -n "$NEW_VERSION" > VERSION
 
 # Update version in README.md
 sed -i '' -E "s/(Toggle \*\*Key Display\*\*  \(v)[0-9]+(\.[0-9]+)*(\.[0-9]+)*/\1$NEW_VERSION/g" README.md
-sed -i '' -E "s/(DualKeyboard v)[0-9]+(\.[0-9]+)*(\.[0-9]+)*/\1$NEW_VERSION/g" README.md
+sed -i '' -E "s/(Dual v)[0-9]+(\.[0-9]+)*(\.[0-9]+)*/\1$NEW_VERSION/g" README.md
 sed -i '' -E "s/^# v[0-9]+(\.[0-9]+)*(\.[0-9]+)*/# v$NEW_VERSION/g" README.md
 
 # Add new changelog entry in README.md if needed
@@ -32,7 +32,7 @@ if ! grep -q "### \[v$NEW_VERSION\]" README.md; then
         INSERT_LINE=$((CHANGELOG_START + 1))
         sed -i '' "${INSERT_LINE}i\\
 \\
-### [v$NEW_VERSION] - $DATE\\
+### [v$NEW_VERSION]\\
 - Version update\\
 " README.md
     fi

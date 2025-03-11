@@ -1,14 +1,14 @@
-#import "DualKeyboardManager+KeyboardStatus.h"
-#import "DualKeyboardManager+MenuBar.h"
-#import "DualKeyboardManager+ConsoleWindow.h"
+#import "DualManager+KeyboardStatus.h"
+#import "DualManager+MenuBar.h"
+#import "DualManager+ConsoleWindow.h"
 #import "NSApplication+CommandLine.h"
 
-@implementation DualKeyboardManager (KeyboardStatus)
+@implementation DualManager (KeyboardStatus)
 
 - (void)setupStatusBar {
     if (!self.debugMode) return;
     
-    NSString *startMsg = @"Dual Keyboard Start\n";
+    NSString *startMsg = @"Dual Start\n";
     NSString *statusMsg = [NSString stringWithFormat:@"Current Mode: %c | Debug: %s\n", 
                           self.currentMode, self.debugMode ? "ON" : "OFF"];
     

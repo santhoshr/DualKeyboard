@@ -1,4 +1,4 @@
-#import "DualKeyboardManager+About.h"
+#import "DualManager+About.h"
 #import <objc/runtime.h>
 
 @interface AboutWindow : NSPanel
@@ -17,7 +17,7 @@
                              backing:NSBackingStoreBuffered
                                defer:NO];  // Important: non-deferred window
     if (self) {
-        self.title = @"About DualKeyboard";
+        self.title = @"About";
         [self center];
         self.movableByWindowBackground = YES;
         self.level = NSPopUpMenuWindowLevel;
@@ -32,7 +32,7 @@
         self.contentView = visualEffectView;
         
         // Setup the logo image view
-        NSImage *logoImage = [NSImage imageNamed:@"DualKeyboardLogo"];
+        NSImage *logoImage = [NSImage imageNamed:@"DualLogo"];
         if (!logoImage) {
             // Create a default logo if image not found
             logoImage = [self createDefaultLogo];
@@ -45,7 +45,7 @@
         
         // App title
         self.titleLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(20, 170, 360, 24)];
-        self.titleLabel.stringValue = @"DualKeyboard";
+        self.titleLabel.stringValue = @"Dual";
         self.titleLabel.alignment = NSTextAlignmentCenter;
         self.titleLabel.font = [NSFont systemFontOfSize:18 weight:NSFontWeightBold];
         self.titleLabel.textColor = [NSColor labelColor];
@@ -71,15 +71,15 @@
         
         // Create styled text with links
         [self appendBoldText:@"Created by " toString:attributedString];
-        [self appendLinkText:@"Santhosh R" withURL:@"https://github.com/santhoshr/DualKeyboard" toString:attributedString];
-        [self appendText:@" (Github)\n\n" toString:attributedString];
+        [self appendText:@"Santhosh R " toString:attributedString];
+        [self appendLinkText:@"(Github)\n\n" withURL:@"https://github.com/santhoshr/dual" toString:attributedString];
         
-        [self appendText:@"Thanks to " toString:attributedString];
-        [self appendBoldText:@"Chance Miller" toString:attributedString];
+        [self appendBoldText:@"Thanks to " toString:attributedString];
+        [self appendText:@"Chance Miller" toString:attributedString];
         [self appendText:@" (" toString:attributedString];
         [self appendLinkText:@"Link" withURL:@"http://dotdotcomorg.net/dual" toString:attributedString];
         [self appendText:@") and " toString:attributedString];
-        [self appendBoldText:@"Phillip Calvin" toString:attributedString];
+        [self appendText:@"Phillip Calvin" toString:attributedString];
         [self appendText:@" (" toString:attributedString];
         [self appendLinkText:@"Github" withURL:@"https://github.com/pnc/dual-keyboards" toString:attributedString];
         [self appendText:@")" toString:attributedString];
@@ -122,7 +122,7 @@
     [circlePath setLineWidth:3.0];
     [circlePath stroke];
     
-    // Draw the "DK" letters in white
+    // Draw the "D" letters in white
     NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
     paragraphStyle.alignment = NSTextAlignmentCenter;
     
@@ -132,7 +132,7 @@
         NSParagraphStyleAttributeName: paragraphStyle
     };
     
-    NSAttributedString *text = [[NSAttributedString alloc] initWithString:@"DK" attributes:textAttributes];
+    NSAttributedString *text = [[NSAttributedString alloc] initWithString:@"D" attributes:textAttributes];
     NSRect textRect = NSMakeRect(0, 30, 128, 70);
     [text drawInRect:textRect];
     
@@ -214,7 +214,7 @@
 
 @end
 
-@implementation DualKeyboardManager (About)
+@implementation DualManager (About)
 
 static char aboutWindowKey;
 

@@ -1,6 +1,6 @@
-#import "DualKeyboard.h"
+#import "Dual.h"
 
-@interface DualKeyboardManager (About)
+@interface DualManager (About)
 
 - (void)showAboutWindow;
 - (void)createAboutWindowIfNeeded;

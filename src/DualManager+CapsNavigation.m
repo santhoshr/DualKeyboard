@@ -1,7 +1,7 @@
-#import "DualKeyboardManager+CapsNavigation.h"
-#import "DualKeyboardManager+KeyboardStatus.h"
-#import "DualKeyboardManager+ConsoleWindow.h"
-#import "DualKeyboardManager+KeyDisplay.h"
+#import "DualManager+CapsNavigation.h"
+#import "DualManager+KeyboardStatus.h"
+#import "DualManager+ConsoleWindow.h"
+#import "DualManager+KeyDisplay.h"
 #import "NSApplication+CommandLine.h"
 #import <mach/mach_time.h>
 
@@ -19,7 +19,7 @@ static const uint64_t HOLD_THRESHOLD = 150000000ULL; // 150ms in nanoseconds
 // Timebase info for accurate timing
 static mach_timebase_info_data_t timebaseInfo;
 
-@implementation DualKeyboardManager (CapsNavigation)
+@implementation DualManager (CapsNavigation)
 
 - (void)setupCapsLockRemapping {
     // Initialize timebase info

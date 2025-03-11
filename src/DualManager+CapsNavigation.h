@@ -1,6 +1,6 @@
-#import "DualKeyboard.h"
+#import "Dual.h"
 
-@interface DualKeyboardManager (CapsNavigation)
+@interface DualManager (CapsNavigation)
 
 - (void)setupCapsLockRemapping;
 - (void)restoreCapsLockMapping;

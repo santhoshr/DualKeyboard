@@ -1,5 +1,5 @@
-#import "DualKeyboardManager+KeyDisplay.h"
-#import "DualKeyboardManager+KeyboardMapping.h"
+#import "DualManager+KeyDisplay.h"
+#import "DualManager+KeyboardMapping.h"
 #import <objc/runtime.h>
 
 @interface KeyDisplayWindow : NSPanel
@@ -178,7 +178,7 @@
 
 @end
 
-@implementation DualKeyboardManager (KeyDisplay)
+@implementation DualManager (KeyDisplay)
 
 static char keyDisplayWindowKey;
 static char lastWindowFrameKey;

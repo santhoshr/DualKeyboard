@@ -1,9 +1,9 @@
-#import "DualKeyboardManager+ConsoleWindow.h"
-#import "DualKeyboardManager+MenuBar.h"
+#import "DualManager+ConsoleWindow.h"
+#import "DualManager+MenuBar.h"
 #import <objc/runtime.h>
 
 @interface ConsoleWindowDelegate : NSObject <NSWindowDelegate>
-@property (weak) DualKeyboardManager *manager;
+@property (weak) DualManager *manager;
 @end
 
 @implementation ConsoleWindowDelegate
@@ -15,7 +15,7 @@
 }
 @end
 
-@implementation DualKeyboardManager (ConsoleWindow)
+@implementation DualManager (ConsoleWindow)
 
 static char consoleTextViewKey;
 static char consoleWindowPipeKey;
@@ -71,7 +71,7 @@ static char originalStdoutFdKey;
     // Default to floating window level (always on top)
     self.consoleWindow.level = NSFloatingWindowLevel;
     
-    self.consoleWindow.title = @"Dual Keyboard Debug Console";
+    self.consoleWindow.title = @"Dual Debug Console";
     self.consoleWindow.backgroundColor = [NSColor whiteColor];
     
     // Create text view and scroll view

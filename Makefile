@@ -8,7 +8,7 @@ BIN_DIR = bin
 
 SOURCES = $(wildcard $(SRC_DIR)/*.m $(SRC_DIR)/*/*.m)
 OBJECTS = $(patsubst $(SRC_DIR)/%.m, $(OBJ_DIR)/%.o, $(SOURCES))
-TARGET = $(BIN_DIR)/dual
+TARGET = $(BIN_DIR)/Dual
 
 .PHONY: all clean
 

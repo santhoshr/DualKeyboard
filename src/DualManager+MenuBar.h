@@ -1,6 +1,6 @@
-#import "DualKeyboard.h"
+#import "Dual.h"
 
-@interface DualKeyboardManager (MenuBar)
+@interface DualManager (MenuBar)
 
 - (void)setupMenuBar;
 - (void)updateMenuBarStatus;

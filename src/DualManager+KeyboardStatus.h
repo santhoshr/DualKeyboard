@@ -1,6 +1,6 @@
-#import "DualKeyboard.h"
+#import "Dual.h"
 
-@interface DualKeyboardManager (KeyboardStatus)
+@interface DualManager (KeyboardStatus)
 - (void)setupStatusBar;
 - (void)updateStatusWithMode:(char)mode;
 - (void)cleanupStatusBar;

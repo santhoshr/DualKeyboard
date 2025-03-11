@@ -1,23 +1,23 @@
-#import "../include/DualKeyboard.h"
-#import "DualKeyboardManager+KeyboardStatus.h"
-#import "DualKeyboardManager+KeyboardMapping.h"
-#import "DualKeyboardManager+CapsNavigation.h"
-#import "DualKeyboardManager+MenuBar.h"
-#import "DualKeyboardManager+SingleInstance.h"
-#import "DualKeyboardManager+About.h"  // Add missing import
+#import "../include/Dual.h"
+#import "DualManager+KeyboardStatus.h"
+#import "DualManager+KeyboardMapping.h"
+#import "DualManager+CapsNavigation.h"
+#import "DualManager+MenuBar.h"
+#import "DualManager+SingleInstance.h"
+#import "DualManager+About.h"  // Add missing import
 
 // Mode constants
 #define MODE_INSERT 'I'
 #define MODE_NAVIGATION 'N'
 
-@interface DualKeyboardManager ()
+@interface DualManager ()
 @property (nonatomic, strong) id eventTap;
 @end
 
-@implementation DualKeyboardManager
+@implementation DualManager
 
 + (instancetype)sharedInstance {
-    static DualKeyboardManager *instance = nil;
+    static DualManager *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[self alloc] init];
@@ -72,7 +72,7 @@ static CGEventRef eventCallback(CGEventTapProxy proxy, CGEventType type, CGEvent
         return event;
     }
     
-    DualKeyboardManager *manager = (__bridge DualKeyboardManager *)refcon;
+    DualManager *manager = (__bridge DualManager *)refcon;
     CGKeyCode keycode = (CGKeyCode)CGEventGetIntegerValueField(event, kCGKeyboardEventKeycode);
     
     if (manager.debugMode) {

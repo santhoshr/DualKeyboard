@@ -45,7 +45,7 @@ extern int lock_fd;
 extern bool should_restart;
 
 // Lock file path for single instance protection
-#define LOCK_FILE "/tmp/dual.lock"
+#define LOCK_FILE "/tmp/Dual.lock"
 
 // Function declarations
 bool ensure_single_instance(void);

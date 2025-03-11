@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # restore-capslock.sh
-# This script restores the original CapsLock functionality if the dual program
+# This script restores the original CapsLock functionality if the Dual program
 # aborts unexpectedly without properly cleaning up.
 
 echo "Restoring original CapsLock functionality..."
@@ -21,9 +21,9 @@ else
 fi
 
 # Check if the lock file exists and remove it
-if [ -f "/tmp/dual.lock" ]; then
-    echo "Removing dual lock file..."
-    rm -f "/tmp/dual.lock"
+if [ -f "/tmp/Dual.lock" ]; then
+    echo "Removing Dual lock file..."
+    rm -f "/tmp/Dual.lock"
     if [ $? -eq 0 ]; then
         echo "✅ Lock file removed successfully."
     else
@@ -32,5 +32,5 @@ if [ -f "/tmp/dual.lock" ]; then
 fi
 
 echo ""
-echo "You can now restart the dual program if desired."
+echo "You can now restart the Dual program if desired."
 echo "" 

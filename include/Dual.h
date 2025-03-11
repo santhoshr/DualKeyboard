@@ -1,9 +1,9 @@
-// DualKeyboard.h
+// Dual.h
 #import <Foundation/Foundation.h>
 #import <Carbon/Carbon.h>
 #import <AppKit/AppKit.h>
 
-@interface DualKeyboardManager : NSObject
+@interface DualManager : NSObject
 
 @property (nonatomic, assign) BOOL debugMode;
 @property (nonatomic, assign) BOOL debugModeAtStartup;  // Track if debug was enabled at launch

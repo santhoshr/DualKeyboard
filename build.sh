@@ -2,7 +2,7 @@
 
 APP_NAME="Dual.app"
 CONTENTS="$APP_NAME/Contents"
-BUNDLE_ID="com.santhoshr.dual"
+BUNDLE_ID="com.santhoshr.Dual"
 
 # Read version from VERSION file
 VERSION=$(cat VERSION)
@@ -28,13 +28,13 @@ mkdir -p "$CONTENTS"/{MacOS,Resources}
 make clean && make
 
 # Copy binary and make executable
-cp bin/dual "$CONTENTS/MacOS/"
-chmod +x "$CONTENTS/MacOS/dual"
+cp bin/Dual "$CONTENTS/MacOS/"
+chmod +x "$CONTENTS/MacOS/Dual"
 
 # Copy resources
 cp VERSION "$CONTENTS/Resources/"
-cp Resources/DualKeyboardLogo.png "$CONTENTS/Resources/" || echo "Warning: Logo not found, will use built-in logo"
-cp Resources/DualKeyboardLogo.icns "$CONTENTS/Resources/" || echo "Warning: Icon not found, will use built-in icon"
+cp Resources/DualLogo.png "$CONTENTS/Resources/" || echo "Warning: Logo not found, will use built-in logo"
+cp Resources/DualLogo.icns "$CONTENTS/Resources/" || echo "Warning: Icon not found, will use built-in icon"
 
 # Get Development Team ID and identity
 TEAM_ID=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | cut -d '"' -f 2 | cut -d "(" -f 2 | cut -d ")" -f 1)
@@ -50,7 +50,7 @@ sed -e "s/\$(CURRENT_MAC_OS_VERSION)/$CURRENT_OS/g" \
 
 # Create bundle references
 CERT_NAME="dual-codesign-cert"
-BUNDLE_REF="com.santhoshr.dual"
+BUNDLE_REF="com.santhoshr.Dual"
 
 # Proper signing with explicit certificate and bundle ID
 codesign --force \

@@ -1,12 +1,12 @@
-![DualKeyboard Logo](Resources/DualKeyboardLogo.png)
+![dual Logo](Resources/DualLogo.png)
 
-# v4.0.2
+# Dual v4.0.3
 
 ## About
 
-DualKeyboard is a small utility to allow the use of modifier keys "across" external keyboards in OS X. This is useful for people who want to use multiple external keyboards in a split-keyboard arrangement, or because they use a foot pedal or other assistive device.
+Dual is a small utility to allow the use of modifier keys "across" external keyboards in OS X. This is useful for people who want to use multiple external keyboards in a split-keyboard arrangement, or because they use a foot pedal or other assistive device.
 
-DualKeyboard is **not mine.** It was written by [Chance Miller](http://dotdotcomorg.net/dual). [Phillip Calvin](https://github.com/pnc/dual-keyboards) preserved it on GitHub. 
+Dual is **not mine.** It was written by [Chance Miller](http://dotdotcomorg.net/dual). [Phillip Calvin](https://github.com/pnc/dual-keyboards) preserved it on GitHub. 
 
 I used Claude/Other models to customize and improve it for replacing Karabiner Elements/Kanata for simple dual keyboard use, vim style navigation, KeyCastr style key display for keyboard testing. 
 
@@ -37,7 +37,7 @@ This project is untested and requires prior coding knowledge to use and modify. 
 
 ## Usage 
 
-You need to create ```dual-codesign-cert``` for signing follow [this](https://github.com/nikitabobko/AeroSpace/blob/main/dev-docs/development.md#2-create-codesign-certificate) and create similar one for DualKeyboard.
+You need to create ```dual-codesign-cert``` for signing follow [this](https://github.com/nikitabobko/AeroSpace/blob/main/dev-docs/development.md#2-create-codesign-certificate) and create similar one for Dual.
 
 ```
 make clean && make && ./build.sh
@@ -74,7 +74,7 @@ Available options:
 - **Escape + Control + Space**: Exit the program
 - **Escape + 0**: Restart the program (exit and launch again)
 - **Escape + -**: Toggle debug messages (only when debug mode is active and quiet mode is not enabled) (quiet mode is default in latest versions no -q flag as well)
-- **Escape + +**: Toggle **Key Display**  (v4.0.2)
+- **Escape + +**: Toggle **Key Display**  (v4.0.3)
 - **CapsLock (tap)**: Send Escape key
 - **CapsLock (hold) + h/j/k/l**: Arrow keys (left/down/up/right)
 - **CapsLock (hold) + i/o**: Page Up/Page Down
@@ -108,7 +108,10 @@ This script will:
 
 ## Changelog
 
-### [v4.0.2] 
+### [v4.0.3]
+- Reverted application name to Dual from DualKeyboard
+
+### [v4.0.2]
 - fix: prevent Capslock remapping from reverting 
 
 ### [v4.0.1]
