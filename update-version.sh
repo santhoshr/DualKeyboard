@@ -20,20 +20,26 @@ echo -n "$NEW_VERSION" > VERSION
 # Update version in README.md
 sed -i '' -E "s/(Toggle \*\*Key Display\*\*  \(v)[0-9]+(\.[0-9]+)*(\.[0-9]+)*/\1$NEW_VERSION/g" README.md
 sed -i '' -E "s/(DualKeyboard v)[0-9]+(\.[0-9]+)*(\.[0-9]+)*/\1$NEW_VERSION/g" README.md
+sed -i '' -E "s/^# v[0-9]+(\.[0-9]+)*(\.[0-9]+)*/# v$NEW_VERSION/g" README.md
 
-# Create a new changelog entry if needed
-if ! grep -q "## \[v$NEW_VERSION\]" CHANGELOG.md; then
+# Add new changelog entry in README.md if needed
+if ! grep -q "### \[v$NEW_VERSION\]" README.md; then
     DATE=$(date +%Y-%m-%d)
-    sed -i '' "2i\\
-## [v$NEW_VERSION] - $DATE\\
-- Version update\\
+    # Find the line number where the changelog section starts
+    CHANGELOG_START=$(grep -n "^## Changelog" README.md | cut -d: -f1)
+    if [ ! -z "$CHANGELOG_START" ]; then
+        # Add 1 to get to the line after "## Changelog"
+        INSERT_LINE=$((CHANGELOG_START + 1))
+        sed -i '' "${INSERT_LINE}i\\
 \\
-" CHANGELOG.md
+### [v$NEW_VERSION] - $DATE\\
+- Version update\\
+" README.md
+    fi
 fi
 
 echo "Version updated successfully. Please check the following files:"
 echo "- VERSION"
 echo "- README.md"
-echo "- CHANGELOG.md"
 echo ""
 echo "Remember to build the app to apply the changes: ./build.sh"

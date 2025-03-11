@@ -11,6 +11,7 @@ static BOOL vimModeLocked = NO;
 static BOOL capsKeyDown = NO;
 static uint64_t capsKeyPressTime = 0;
 static BOOL keyRepeat = NO;
+static NSTimer *remapCheckTimer = nil;
 
 // Constants
 static const uint64_t HOLD_THRESHOLD = 150000000ULL; // 150ms in nanoseconds
@@ -26,33 +27,97 @@ static mach_timebase_info_data_t timebaseInfo;
         mach_timebase_info(&timebaseInfo);
     }
     
-    // Remap CapsLock to Section key
+    [self applyCapsLockRemapping];
+    
+    // Set up periodic check every 30 seconds
+    if (!remapCheckTimer) {
+        remapCheckTimer = [NSTimer scheduledTimerWithTimeInterval:30.0
+                                                         target:self
+                                                       selector:@selector(checkAndReapplyCapsLockMapping)
+                                                       userInfo:nil
+                                                        repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:remapCheckTimer forMode:NSRunLoopCommonModes];
+    }
+}
+
+- (void)applyCapsLockRemapping {
     NSTask *task = [[NSTask alloc] init];
     NSPipe *pipe = [NSPipe pipe];
     task.standardOutput = pipe;
     task.standardError = pipe;
     task.launchPath = @"/usr/bin/hidutil";
     task.arguments = @[@"property", @"--set", @"{\"UserKeyMapping\":[{\"HIDKeyboardModifierMappingSrc\":0x700000039,\"HIDKeyboardModifierMappingDst\":0x700000064}]}"];
-    [task launch];
+    
+    NSError *error = nil;
+    [task launchAndReturnError:&error];
+    
+    if (error) {
+        if (self.debugMode) {
+            NSLog(@"Error applying CapsLock mapping: %@", error);
+        }
+        return;
+    }
+    
     [task waitUntilExit];
     
-    if (self.debugMode) {
+    if (task.terminationStatus != 0) {
+        NSData *errorData = [[pipe fileHandleForReading] readDataToEndOfFile];
+        NSString *errorOutput = [[NSString alloc] initWithData:errorData encoding:NSUTF8StringEncoding];
+        if (self.debugMode) {
+            NSLog(@"CapsLock remapping failed with status %d: %@", task.terminationStatus, errorOutput);
+        }
+    } else if (self.debugMode) {
         NSLog(@"CapsLock remapping applied successfully");
     }
 }
 
+- (void)checkAndReapplyCapsLockMapping {
+    // Check if capslock is still mapped correctly by checking a recent keycode
+    if (self.debugMode) {
+        NSLog(@"Checking CapsLock mapping status...");
+    }
+    
+    static NSTimeInterval lastRemapTime = 0;
+    NSTimeInterval currentTime = [[NSDate date] timeIntervalSince1970];
+    
+    // Only reapply if more than 1 second has passed since last remap
+    if (currentTime - lastRemapTime > 1.0) {
+        [self applyCapsLockRemapping];
+        lastRemapTime = currentTime;
+        
+        if (self.debugMode) {
+            NSLog(@"CapsLock mapping reapplied at %@", [NSDate date]);
+        }
+    }
+}
+
 - (void)restoreCapsLockMapping {
+    if (remapCheckTimer) {
+        [remapCheckTimer invalidate];
+        remapCheckTimer = nil;
+    }
+    
     NSTask *task = [[NSTask alloc] init];
     NSPipe *pipe = [NSPipe pipe];
     task.standardOutput = pipe;
     task.standardError = pipe;
     task.launchPath = @"/usr/bin/hidutil";
     task.arguments = @[@"property", @"--set", @"{\"UserKeyMapping\":[]}"];
-    [task launch];
+    
+    NSError *error = nil;
+    [task launchAndReturnError:&error];
+    
+    if (error) {
+        if (self.debugMode) {
+            NSLog(@"Error restoring CapsLock mapping: %@", error);
+        }
+        return;
+    }
+    
     [task waitUntilExit];
     
-    if (self.debugMode) {
-        NSLog(@"Original keyboard mapping restored");
+    if (task.terminationStatus == 0 && self.debugMode) {
+        NSLog(@"Original keyboard mapping restored successfully");
     }
 }
 
@@ -172,6 +237,15 @@ static mach_timebase_info_data_t timebaseInfo;
             }
             return YES;
         }
+    }
+
+    // If we detect CapsLock reverting (keycode 57), reapply the mapping
+    if (keycode == 57 && type == kCGEventFlagsChanged) {
+        if (self.debugMode) {
+            NSLog(@"Detected CapsLock reversion, reapplying mapping...");
+        }
+        [self applyCapsLockRemapping];
+        return YES;
     }
 
     // Handle Escape key for exiting navigation mode

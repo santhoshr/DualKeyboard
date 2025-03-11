@@ -1,6 +1,6 @@
 ![DualKeyboard Logo](Resources/DualKeyboardLogo.png)
 
-# v4.0.1
+# v4.0.2
 
 ## About
 
@@ -74,7 +74,7 @@ Available options:
 - **Escape + Control + Space**: Exit the program
 - **Escape + 0**: Restart the program (exit and launch again)
 - **Escape + -**: Toggle debug messages (only when debug mode is active and quiet mode is not enabled) (quiet mode is default in latest versions no -q flag as well)
-- **Escape + +**: Toggle **Key Display**  (v4.0.0)
+- **Escape + +**: Toggle **Key Display**  (v4.0.2)
 - **CapsLock (tap)**: Send Escape key
 - **CapsLock (hold) + h/j/k/l**: Arrow keys (left/down/up/right)
 - **CapsLock (hold) + i/o**: Page Up/Page Down
@@ -107,6 +107,9 @@ This script will:
 3. Allow you to restart the program if desired
 
 ## Changelog
+
+### [v4.0.2] 
+- fix: prevent Capslock remapping from reverting 
 
 ### [v4.0.1]
 - Code Optimization
